@@ -1,0 +1,56 @@
+---
+title: "MCGalaxy plugin system overview"
+description: "MCGalaxy's plugin system lets you extend server behaviour with custom C# code — hooking events, adding commands, and modifying server state."
+---
+
+Plugins are the primary extension mechanism in MCGalaxy. A plugin is a compiled C# DLL that the server loads at runtime, giving your code full access to server internals: you can listen for and react to player and level events, register new slash commands, read and write player data, and manipulate level blocks — all without modifying the core server source.
+
+## What plugins can do
+
+- **Hook events** — react to player chat, movement, block changes, connections, level loads, and more using the typed `IEvent<T>` system.
+- **Register commands** — add new `/commands` by subclassing `Command2` and calling `Command.Register(...)`.
+- **Modify player and level state** — read and write fields on `Player` and `Level` instances, send fake block changes, teleport players, and change ranks.
+- **Access the database** — query and update the SQLite (or MySQL) backend through `Database.ReadRows`, `Database.UpdateRows`, and friends.
+- **Read and write configuration** — annotate fields with `[ConfigBool]`, `[ConfigString]`, or `[ConfigInt]` and use `ConfigElement` to load and save settings files.
+
+## Plugin lifecycle
+
+Every plugin implements the abstract `Plugin` class. The server calls two lifecycle methods:
+
+| Method | When called |
+|---|---|
+| `Load(bool auto)` | On server startup (`auto = true`) or when loaded manually via `/plugin load` (`auto = false`) |
+| `Unload(bool auto)` | On server shutdown (`auto = true`) or when unloaded manually via `/plugin unload` (`auto = false`) |
+
+Inside `Load`, hook your events and register your commands. Inside `Unload`, unhook all events and release any resources to avoid memory leaks.
+
+## Plugin DLL directory
+
+Plugin DLLs are placed in the `plugins/` directory, defined in source as `IScripting.PLUGINS_DLL_DIR`. At startup, `IScripting.AutoloadPlugins()` scans that folder for `*.dll` files and loads them in alphabetical order (ensuring deterministic load order when plugins depend on each other).
+
+## Managing plugins at runtime
+
+| Command | Effect |
+|---|---|
+| `/plugin load [name]` | Loads `plugins/[name].dll` |
+| `/plugin unload [name]` | Unloads the named plugin |
+| `/plugin info [name]` | Displays plugin metadata |
+
+## Core vs custom plugins
+
+`Plugin.core` holds built-in plugins shipped with MCGalaxy (IRC, Discord, review system, games, etc.). `Plugin.custom` holds plugins loaded from the `plugins/` directory. The `/plugin` command only operates on entries in `Plugin.custom`.
+
+## LoadAtStartup
+
+The `LoadAtStartup` property (defaults to `true`) controls whether `Load(bool auto)` is called when the server starts up. If you return `false`, the plugin is registered in `Plugin.custom` but its `Load` method is skipped until an operator manually runs `/plugin load [name]`.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Creating a plugin" href="/dev/creating-a-plugin">
+    Step-by-step guide to writing, compiling, and loading your first plugin.
+  </Card>
+  <Card title="Creating a command" href="/dev/creating-a-command">
+    Add custom slash commands using the Command2 base class.
+  </Card>
+</CardGroup>

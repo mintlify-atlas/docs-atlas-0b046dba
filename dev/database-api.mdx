@@ -1,0 +1,125 @@
+---
+title: "Database API for MCGalaxy plugins"
+description: "Access MCGalaxy's SQLite or MySQL database from plugins using the Database class to create tables, query rows, insert data, and update records."
+---
+
+MCGalaxy's `Database` class (in the `MCGalaxy.SQL` namespace) provides a backend-agnostic API that works with both SQLite (the default) and MySQL. Use it from plugins to persist data across server restarts.
+
+## Reading rows
+
+```csharp
+using MCGalaxy.SQL;
+
+// Read all rows from a table, getting specific columns
+Database.ReadRows("MyPluginData", "Name, Score",
+    record => {
+        string name  = record.GetText(0);
+        int    score = record.GetInt32(1);
+        Logger.Log(LogType.SystemActivity, "{0}: {1}", name, score);
+    }
+);
+
+// Read with a WHERE filter (always use parameterised @0, @1, ... placeholders)
+Database.ReadRows("MyPluginData", "Score",
+    record => { int s = record.GetInt32(0); },
+    "WHERE Name = @0", playerName
+);
+```
+
+## Getting a single value
+
+```csharp
+// Count rows
+int count = Database.CountRows("MyPluginData");
+int filtered = Database.CountRows("MyPluginData", "WHERE Score > @0", 100);
+
+// Read a single string field
+string score = Database.ReadString("MyPluginData", "Score", "WHERE Name = @0", playerName);
+
+// Get all rows as string arrays
+List<string[]> rows = Database.GetRows("MyPluginData", "Name, Score");
+```
+
+## Inserting and updating
+
+```csharp
+// Insert a new row
+Database.AddRow("MyPluginData", "Name, Score", playerName, 0);
+
+// Add or replace (upsert by primary key)
+Database.AddOrReplaceRow("MyPluginData", "Name, Score", playerName, newScore);
+
+// Update existing rows
+Database.UpdateRows("MyPluginData", "Score = @1", "WHERE Name = @0", playerName, newScore);
+
+// Delete rows
+Database.DeleteRows("MyPluginData", "WHERE Name = @0", playerName);
+```
+
+## Creating a table
+
+Always create your table before using it. `CreateTable` is a no-op if the table already exists:
+
+```csharp
+using MCGalaxy.SQL;
+
+void CreateMyTable()
+{
+    ColumnDesc[] cols = new ColumnDesc[] {
+        new ColumnDesc("Name",  ColumnType.VarChar, 16, primary: true),
+        new ColumnDesc("Score", ColumnType.Int32),
+    };
+    Database.CreateTable("MyPluginData", cols);
+}
+```
+
+Call this in your plugin's `Load` method to ensure the table exists before reading or writing.
+
+## Full plugin example
+
+```csharp
+using MCGalaxy;
+using MCGalaxy.SQL;
+using MCGalaxy.Events.PlayerEvents;
+
+public class ScorePlugin : Plugin
+{
+    public override string name { get { return "ScorePlugin"; } }
+
+    public override void Load(bool auto)
+    {
+        // Ensure table exists
+        ColumnDesc[] cols = {
+            new ColumnDesc("Name",  ColumnType.VarChar, 16, primary: true),
+            new ColumnDesc("Score", ColumnType.Int32),
+        };
+        Database.CreateTable("Scores", cols);
+
+        OnPlayerConnectEvent.Register(OnConnect, Priority.Normal);
+    }
+
+    public override void Unload(bool auto)
+    {
+        OnPlayerConnectEvent.Unregister(OnConnect);
+    }
+
+    void OnConnect(Player p)
+    {
+        if (p.IsSuper) return;
+        string val = Database.ReadString("Scores", "Score", "WHERE Name = @0", p.name);
+        int score  = val == null ? 0 : int.Parse(val);
+        p.Message("Your score: " + score);
+    }
+}
+```
+
+## Database backends
+
+| Backend | Config property | Notes |
+|---------|-----------------|-------|
+| SQLite | Default | No setup needed; data stored in `MCGalaxy.db` |
+| MySQL | `useMySQL = true` in server properties | Requires MySQL server and credentials in `mysql.properties` |
+
+<Warning>
+Always use parameterised placeholders (`@0`, `@1`, ...) instead of string interpolation. Never build SQL queries by concatenating user input — this prevents SQL injection.
+</Warning>

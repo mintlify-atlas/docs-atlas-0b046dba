@@ -1,0 +1,128 @@
+---
+title: "Overseer: personal player realms"
+description: "Overseer gives each player their own personal world with full building rights, zone controls, and environment customisation — all managed with /os commands."
+---
+
+Overseer is MCGalaxy's personal-realm system. Each player can own one or more maps named after them, with full build and visit control over those maps. Players manage their realms entirely through the `/os` command (aliases: `/realm`, `/myrealm`) without needing operator assistance for day-to-day changes.
+
+## Navigating your realm
+
+```bash
+/os go          # Teleport to your primary realm (creates it if needed)
+/os go [n]      # Teleport to your nth realm
+/os setspawn    # Set the spawn point to your current position
+```
+
+## Creating and deleting realms
+
+```bash
+/os add                              # Create a 128×128×128 flat realm
+/os add [theme]                      # Create a realm with a specific terrain theme
+/os add [width] [height] [length] [theme]  # Create a realm with custom dimensions
+/os delete                           # Delete your current realm
+```
+
+Run `/help newlvl themes` for a list of valid terrain themes.
+
+How many realms a player can own is controlled by the `OverseerMaps` value configured for each rank. When a player reaches their limit, `/os add` reports an error.
+
+<Note>
+  Your realm names always begin with your player name as a prefix (e.g. `alice`, `alice2`, `alice-garden`). You cannot create a realm whose name doesn't start with your own name.
+</Note>
+
+## Map options
+
+```bash
+/os map [option] [value]
+```
+
+Sets map options on your current realm, using the same options as `/map`. Not all options are available — `Speed`, `Overload`, `RealmOwner`, `LoadOnGoto`, and `Unload` are restricted to server operators.
+
+```bash
+/os map motd Welcome to my realm!
+/os map physics 1
+/os map chat on
+/os physics [0-5]    # Shortcut for physics level only
+```
+
+## Environment settings
+
+```bash
+/os env [option] [value]
+```
+
+Changes sky, cloud, fog, lighting, and weather on your realm. Uses the same options as `/env`.
+
+```bash
+/os env sky 000033         # Dark blue sky
+/os env weather rain       # Enable rain
+/os env fog reset          # Reset fog to server default
+/os preset [name]          # Apply a preset environment colour scheme
+```
+
+## Controlling who can visit and build
+
+```bash
+/os allow [player]         # Let a player build in your realm
+/os disallow [player]      # Remove a player's build access
+/os ban [player]           # Ban a player from visiting your realm
+/os unban [player]         # Remove a visit ban
+/os perbuild [rank]        # Set minimum rank required to build
+/os pervisit [rank]        # Set minimum rank required to visit
+```
+
+These mirror the server-wide `/perbuild` and `/pervisit` commands but are scoped to the realm owner's current map.
+
+## Kicking players
+
+```bash
+/os kick [name]    # Move a specific player to the main level
+/os kickall        # Move all other players to the main level
+```
+
+Kicked players are sent to the server's main level. They are not banned — use `/os ban` to prevent re-entry.
+
+## Zone plots
+
+Zones let you define sub-regions of your realm with their own permissions or environment settings.
+
+```bash
+/os plot add [name]         # Mark two corners, then create a named zone
+/os plot remove [name]      # Remove a zone
+/os plot list               # List zones in your realm
+```
+
+`/os plot` is the realm-owner version of the server-wide `/zone` command.
+
+## Extra realms
+
+If your rank allows more than one realm (`OverseerMaps > 1`), each call to `/os add` creates a new realm:
+
+```bash
+/os add               # Creates alice, then alice2, alice3, etc.
+/os go 2              # Teleport to your second realm
+/os list              # List all your realms
+/os list [player]     # List all realms owned by another player
+```
+
+Use `/os rename <suffix>` to give a realm a custom name (your player name is always kept as the prefix, and renaming must be enabled by the server admin).
+
+## Set up your first realm
+
+<Steps>
+  <Step title="Create your realm">
+    Run `/os add` to generate a default 128×128×128 flat map named after you. You are added to the build whitelist automatically.
+  </Step>
+  <Step title="Go to your realm">
+    Run `/os go` to teleport in. Your character spawns at the map's default spawn point.
+  </Step>
+  <Step title="Set your spawn point">
+    Walk to where you want players to appear, then run `/os setspawn`.
+  </Step>
+  <Step title="Invite a friend to build">
+    Run `/os allow [playername]` to add them to your build whitelist. They can now place and delete blocks on your realm.
+  </Step>
+  <Step title="Customise the environment">
+    Run `/os env sky FF8800` for an orange sky, or `/os env weather snow` to add snow. Use `/os preset` to apply a full colour scheme at once.
+  </Step>
+</Steps>

@@ -1,0 +1,131 @@
+---
+title: "Creating a custom MCGalaxy plugin"
+description: "Step-by-step guide to writing, compiling, and loading a custom C# plugin for MCGalaxy — with event hooks and real code examples."
+---
+
+A plugin is a C# class library that subclasses `Plugin`, placed as a DLL in the `plugins/` directory. This guide walks through writing a minimal plugin, filling in the optional metadata properties, and wiring up an event hook.
+
+<Steps>
+
+### Create a new C# class library project
+
+Create a new project targeting `.NET Framework 4.0` (or the runtime your MCGalaxy build uses). Add a reference to `MCGalaxy.exe` from your server folder.
+
+### Write the plugin skeleton
+
+Every plugin must implement the three abstract members: `name`, `Load(bool auto)`, and `Unload(bool auto)`.
+
+```csharp
+using MCGalaxy;
+using MCGalaxy.Events.PlayerEvents;
+
+public class MyPlugin : Plugin
+{
+    // Required: unique name used by /plugin commands
+    public override string name { get { return "MyPlugin"; } }
+
+    public override void Load(bool auto)
+    {
+        OnPlayerConnectEvent.Register(OnPlayerConnect, Priority.Normal);
+    }
+
+    public override void Unload(bool auto)
+    {
+        OnPlayerConnectEvent.Unregister(OnPlayerConnect);
+    }
+
+    void OnPlayerConnect(Player p)
+    {
+        p.Message("&aWelcome to the server, " + p.DisplayName + "&a!");
+        Logger.Log(LogType.SystemActivity, "{0} joined the server.", p.truename);
+    }
+}
+```
+
+### Add optional metadata properties
+
+These properties are all optional but improve visibility and compatibility checking.
+
+```csharp
+// Minimum MCGalaxy version this plugin requires (checked at load time)
+public override string MCGalaxy_Version { get { return "1.9.4.9"; } }
+
+// Build number shown by /plugin info
+public override int build { get { return 1; } }
+
+// Message printed to server log after loading
+public override string welcome { get { return "MyPlugin loaded!"; } }
+
+// Your name, shown in error messages if the plugin fails to load
+public override string creator { get { return "YourName"; } }
+
+// Set false to prevent auto-load on startup; requires /plugin load to activate
+public override bool LoadAtStartup { get { return true; } }
+
+// Called when a player runs /help [plugin-name]
+public override void Help(Player p)
+{
+    p.Message("&TMyPlugin &S- sends a welcome message to joining players.");
+}
+```
+
+### Compile to a DLL
+
+Build the project and copy the output DLL to the `plugins/` directory inside your server folder:
+
+```
+plugins/
+  MyPlugin.dll
+```
+
+The DLL filename does not need to match the plugin `name` property, but it is conventional to keep them the same.
+
+### Load the plugin
+
+**Auto-load:** if `LoadAtStartup` returns `true`, the plugin loads automatically when the server starts.
+
+**Manual load:** with the server running, an operator can run:
+
+```
+/plugin load MyPlugin
+```
+
+This calls `IScripting.LoadPlugin("plugins/MyPlugin.dll", auto: false)`, which instantiates any `Plugin` subclasses in the DLL and calls `Load(false)` on each.
+
+</Steps>
+
+## Full working example
+
+The plugin below logs a message every time a player joins and shows a one-time greeting.
+
+```csharp
+using MCGalaxy;
+using MCGalaxy.Events.PlayerEvents;
+
+public sealed class WelcomePlugin : Plugin
+{
+    public override string name    { get { return "WelcomePlugin"; } }
+    public override string creator { get { return "Example"; } }
+    public override int    build   { get { return 2; } }
+
+    public override void Load(bool auto)
+    {
+        OnPlayerConnectEvent.Register(OnConnect, Priority.Normal);
+    }
+
+    public override void Unload(bool auto)
+    {
+        OnPlayerConnectEvent.Unregister(OnConnect);
+    }
+
+    static void OnConnect(Player p)
+    {
+        p.Message("&eWelcome, &f" + p.DisplayName + "&e! Type &T/help &efor commands.");
+        Logger.Log(LogType.UserActivity, "WelcomePlugin: {0} connected from {1}", p.truename, p.ip);
+    }
+}
+```
+
+<Note>
+Always unregister every event handler in `Unload`. Failing to do so leaves dangling handlers pointing at your plugin's code, which will cause errors and potential crashes after the plugin is unloaded.
+</Note>

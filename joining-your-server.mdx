@@ -1,0 +1,166 @@
+---
+title: "Connect players to your MCGalaxy server"
+description: "How to join your MCGalaxy server locally, share it on your LAN, or open it to internet players with port forwarding and the ClassiCube server list."
+---
+
+Once your MCGalaxy server is running, there are several ways players can connect — from your own machine using the loopback address, from other devices on the same network, or from anywhere on the internet. This page covers all three connection methods and how to make your server publicly visible on the ClassiCube server list.
+
+<Tabs>
+  <Tab title="Local">
+    Use this method to connect to your own server from the same machine it is running on.
+
+    <Steps>
+      <Step title="Start your server">
+        Make sure MCGalaxy is running (via `MCGalaxy.exe` or `MCGalaxyCLI.exe`). You should see the server console output with no errors.
+      </Step>
+      <Step title="Open the ClassiCube client">
+        Launch the ClassiCube client and click **Direct connect** from the main menu.
+      </Step>
+      <Step title="Enter the connection details">
+        Fill in the fields as follows:
+
+        | Field    | Value             |
+        | -------- | ----------------- |
+        | Username | your username     |
+        | IP:Port  | `127.0.0.1:25565` |
+        | Mppass   | *(leave blank)*   |
+
+        Click **Connect**.
+      </Step>
+    </Steps>
+
+    <Note>
+      `127.0.0.1` is the loopback address — it always refers to the current machine. Only you can connect using this address.
+    </Note>
+  </Tab>
+
+  <Tab title="LAN">
+    Use this method to let other devices on your home or local network join your server without any port forwarding.
+
+    <Steps>
+      <Step title="Find your LAN IP address">
+        You need to know the local IP address assigned to the machine running MCGalaxy.
+
+        <Tabs>
+          <Tab title="Windows">
+            Open **Command Prompt** and run:
+
+            ```bat
+            ipconfig
+            ```
+
+            Look for **IPv4 Address** in the output — it is usually in the `192.168.x.x` range.
+          </Tab>
+          <Tab title="macOS">
+            Open **Terminal** and run one of the following (try both if the first returns nothing):
+
+            ```bash
+            ipconfig getifaddr en0
+            ```
+
+            ```bash
+            ipconfig getifaddr en1
+            ```
+          </Tab>
+          <Tab title="Linux">
+            Open a terminal and run:
+
+            ```bash
+            hostname -I
+            ```
+
+            The first address in the output is typically your LAN IP.
+          </Tab>
+        </Tabs>
+      </Step>
+
+      <Step title="Connect from the ClassiCube client">
+        On the device joining the server, open the ClassiCube client and click **Direct connect**. Fill in:
+
+        | Field    | Value                         |
+        | -------- | ----------------------------- |
+        | Username | your username                 |
+        | IP:Port  | `[your LAN IP]:25565` (e.g. `192.168.1.30:25565`) |
+        | Mppass   | *(leave blank)*               |
+
+        Click **Connect**.
+      </Step>
+
+      <Step title="(Optional) Connect from a web browser">
+        If you are signed in to classicube.net, you can also connect via a web browser. Take the server URL shown in the MCGalaxy console and append `?ip=[your LAN IP]`:
+
+        ```
+        http://www.classicube.net/server/play/d1362e7fee1a54365514712d007c8799?ip=192.168.1.30
+        ```
+
+        Enter that full URL into the browser address bar.
+      </Step>
+    </Steps>
+
+    <Note>
+      Both devices must be on the same local network (e.g. connected to the same router or Wi-Fi access point). The server machine's firewall must allow inbound connections on port 25565.
+    </Note>
+  </Tab>
+
+  <Tab title="Internet">
+    Use this method to let players connect from anywhere. This requires configuring port forwarding on your router.
+
+    <Steps>
+      <Step title="Port forward port 25565">
+        Log in to your router's admin panel (usually at `192.168.1.1` or `192.168.0.1`) and create a port forwarding rule:
+
+        | Setting       | Value                                      |
+        | ------------- | ------------------------------------------ |
+        | Protocol      | TCP (or TCP/UDP)                           |
+        | External port | `25565`                                    |
+        | Internal IP   | the LAN IP of the machine running MCGalaxy |
+        | Internal port | `25565`                                    |
+
+        The exact steps vary by router model — consult your router's documentation or portforward.com for model-specific instructions.
+      </Step>
+
+      <Step title="Share your server URL">
+        After the server starts, MCGalaxy displays a URL in the console:
+
+        ```
+        http://www.classicube.net/server/play/d1362e7fee1a54365514712d007c8799
+        ```
+
+        Share this URL with your players. They can paste it directly into a web browser (if signed in to classicube.net) to connect.
+      </Step>
+
+      <Step title="Connect from the ClassiCube client using the hash">
+        Players can also connect using the ClassiCube client:
+
+        1. Open the ClassiCube client and click **Sign in**.
+        2. Copy the hash portion of the server URL — the long alphanumeric string at the end (e.g. `d1362e7fee1a54365514712d007c8799`).
+        3. Paste the hash into the `classicube.net/server/play` text box.
+        4. Click **Connect**.
+      </Step>
+    </Steps>
+
+    <Warning>
+      Port forwarding makes your server reachable from the public internet. Make sure you are comfortable with this before proceeding, and consider enabling name verification in your server settings to prevent impersonation.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Show on the ClassiCube server list
+
+You can make your server appear publicly in the ClassiCube client's server browser and on classicube.net.
+
+<Steps>
+  <Step title="Open Settings in MCGalaxy">
+    In the MCGalaxy GUI, click **Settings** at the top of the window.
+  </Step>
+  <Step title="Enable Public">
+    Tick the **Public** checkbox.
+  </Step>
+  <Step title="Save">
+    Click **Save**. Your server will begin appearing in the server list on classicube.net and in the ClassiCube client's server browser.
+  </Step>
+</Steps>
+
+<Tip>
+  Setting a distinctive server name and MOTD helps your server stand out in the public list. You can configure both under **Settings** in the MCGalaxy window, or by editing `server.properties` directly.
+</Tip>

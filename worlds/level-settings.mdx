@@ -1,0 +1,159 @@
+---
+title: "Level settings and environment options"
+description: "Configure physics, access permissions, environment visuals, and per-level chat for each world in MCGalaxy using the /map and /env commands."
+---
+
+Every level in MCGalaxy carries a persistent configuration that controls how it behaves — from whether water flows and saplings grow, to which ranks can visit and build, to what the sky and clouds look like. The two primary commands for managing this configuration are `/map` and `/env`.
+
+## /map — general level options
+
+```bash
+/map [option] [value]           # Set an option on your current level
+/map [level] [option] [value]   # Set an option on a named level
+/map [level]                    # Display all settings for a level
+```
+
+Run `/help map options` in-game for the full list, and `/help map [option]` for details on any individual option.
+
+### Key options
+
+| Option | Values | Description |
+|---|---|---|
+| `motd` | text string | Custom MOTD shown when entering the level. Supports hack-control flags (see below). |
+| `maxplayers` | number | Maximum players allowed on the level at once. |
+| `visitrank` | rank name | Minimum rank required to visit (alias for `/pervisit`). |
+| `buildrank` | rank name | Minimum rank required to build (alias for `/perbuild`). |
+| `physics` | 0–5 | Physics simulation level (see below). |
+| `chat` | on/off | When on, chat is local to this level only (`ServerWideChat` is disabled). |
+| `guns` | on/off | Whether guns and missiles can be used on the level. |
+| `historyenabled` | on/off | Whether block-change history is recorded. |
+| `leveltexture` | URL | Texture pack URL applied when players enter the level. |
+| `finite` | on/off | Whether liquids are finite (don't spread infinitely). |
+| `grass` | on/off | Whether grass auto-grows over dirt. |
+| `trees` | on/off | Whether saplings grow into trees over time. |
+| `leaf decay` | on/off | Whether leaf blocks not connected to logs within 4 blocks decay. |
+| `edge` | on/off | Whether water flows from the map edges. |
+| `ai` | on/off | Whether animals hunt or flee. |
+| `death` | on/off | Whether players can die from falling or drowning. |
+| `buildable` | on/off | Whether any blocks can be placed. |
+| `deletable` | on/off | Whether any blocks can be deleted. |
+| `drawing` | on/off | Whether draw commands (e.g. `/z`, `/sphere`) can be used. |
+| `unload` | on/off | Whether the level auto-unloads when empty. |
+| `loadongoto` | on/off | Whether the level auto-loads when `/goto` is used. |
+
+### MOTD hack-control flags
+
+Add these flags to a level's MOTD to enable or disable specific client capabilities:
+
+```
+-hax / +hax          Disallow/allow all hacks
+-fly / +fly          Disallow/allow flying
+-noclip / +noclip    Disallow/allow noclipping
+-speed / +speed      Disallow/allow speed hacks
+-respawn / +respawn  Disallow/allow respawning
++ophax               Allow hacks for Operators and above only
+jumpheight=[n]       Set maximum jump height
+horspeed=[n]         Set base horizontal movement speed
+jumps=[n]            Set maximum consecutive jumps
+```
+
+Example: `/map motd -fly -noclip Survival world — no flying!`
+
+## Physics levels
+
+Set physics with `/physics [level]` or via `/map physics [level]`.
+
+<AccordionGroup>
+  <Accordion title="0 — Off">
+    All physics simulation is disabled. Water, lava, sand, and gravel stay wherever they are placed. No TNT explosions or block cascades occur. Best for build-only maps.
+  </Accordion>
+  <Accordion title="1 — Normal">
+    Standard physics: water and lava spread, sand and gravel fall, sponges absorb liquid, TNT explodes. This is the default for most gameplay levels.
+  </Accordion>
+  <Accordion title="2 — Advanced">
+    Everything from level 1, plus additional block interactions such as snake blocks, firework blocks, and other extended physics types.
+  </Accordion>
+  <Accordion title="3 — Hardcore">
+    Everything from level 2, plus random physics such as finite liquids and more chaotic lava behaviour. Intended for survival or challenge maps.
+  </Accordion>
+  <Accordion title="4 — Instant">
+    Physics blocks process their updates immediately each tick rather than spreading gradually. Useful for rapid-fire redstone-style contraptions.
+  </Accordion>
+  <Accordion title="5 — Doors only">
+    Only door-type block interactions are processed. All other physics are disabled. Useful for maps that need toggleable doors but no liquid spread.
+  </Accordion>
+</AccordionGroup>
+
+Fine-tune physics timing with:
+```bash
+/map speed [milliseconds]    # Delay between physics ticks (default 250 ms = 4 ticks/s)
+/map overload [milliseconds] # Max overrun before physics shuts off (default 1500 ms)
+```
+
+## /env — environment visuals
+
+```bash
+/env [option] [value]   # Set on current level
+```
+
+Pass `reset` or `default` as the value to restore any option to the server default.
+
+| Option | Example value | Description |
+|---|---|---|
+| `sky` | `99CCFF` | Sky colour (hex). |
+| `clouds` | `FFFFFF` | Cloud colour (hex). |
+| `fog` | `FFFFFF` | Fog colour (hex). |
+| `sun` | `FFFFFF` | Colour of blocks in sunlight (hex). |
+| `shadow` | `9B9B9B` | Colour of blocks in shadow (hex). |
+| `weather` | `sun`, `rain`, `snow` | Current weather. |
+| `horizon` | block name | The "ocean" block shown beyond the map edge. |
+| `border` | block name | The "bedrock" block shown below the map edge. |
+| `edgelevel` | number | Water height of the map. |
+| `cloudsheight` | number | Altitude of the cloud layer. |
+| `maxfog` | number | Maximum fog render distance in blocks (e.g. `16` for horror maps). |
+| `smoothfog` | on/off | Whether exponential (smooth) fog is used instead of linear fog. |
+| `lightingmode` | `classic`, `fancy` | Lighting mode (append `locked` to prevent players changing it). |
+| `cloudsSpeed` | decimal | Cloud scroll speed; negative reverses direction. |
+| `weatherSpeed` | decimal | Rain/snow fall speed; negative makes precipitation rise. |
+
+Examples:
+
+```bash
+/env sky 000000          # Black sky
+/env weather rain        # Enable rain
+/env horizon obsidian    # Obsidian beyond the map edge
+/env lightingmode fancy locked
+```
+
+## Access permissions
+
+Control which ranks can visit or build on a level:
+
+```bash
+/pervisit [level] [rank]    # Set minimum rank to visit
+/perbuild [level] [rank]    # Set minimum rank to build
+
+/pervisit [level] +[name]   # Whitelist a specific player to visit
+/pervisit [level] -[name]   # Blacklist a specific player from visiting
+/perbuild [level] +[name]   # Whitelist a specific player to build
+/perbuild [level] -[name]   # Blacklist a specific player from building
+
+/pervisit -max [level] [rank]   # Set maximum rank allowed to visit
+/perbuild -max [level] [rank]   # Set maximum rank allowed to build
+```
+
+`/pervisit` has the alias `/waccess`; `/perbuild` has the alias `/wbuild`.
+
+## Zones
+
+Zones are named rectangular regions within a level that can override build and visit permissions for that area.
+
+```bash
+/zone add [name]     # Mark two corners, then create a zone
+/zone remove [name]  # Delete a zone
+/zone list           # List all zones on the current level
+```
+
+<Tip>
+  Realm owners can manage zones in their own world using `/os plot` instead of `/zone`. See [Overseer: personal player realms](/worlds/overseer-realms) for details.
+</Tip>

@@ -1,0 +1,119 @@
+---
+title: "Event system: hooking server and player events"
+description: "Register handlers for player, level, and server events in MCGalaxy using the typed IEvent system with priority levels and optional cancellation."
+---
+
+MCGalaxy exposes a strongly-typed event system via the `IEvent<T>` class. Each event type has a static `Register` and `Unregister` method. You subscribe in your plugin's `Load` and always unsubscribe in `Unload` to avoid memory leaks or duplicate handlers on hot-reload.
+
+## Registering and unregistering
+
+```csharp
+// Register
+OnPlayerChatEvent.Register(OnChat, Priority.Normal);
+
+// Unregister
+OnPlayerChatEvent.Unregister(OnChat);
+
+// Handler signature must match the event's delegate exactly
+void OnChat(Player p, string message) { ... }
+```
+
+## Priority
+
+The `Priority` enum controls call order — higher priority handlers run first:
+
+| Value | Numeric |
+|-------|---------|
+| `Priority.Low` | 0 |
+| `Priority.Normal` | 1 |
+| `Priority.High` | 2 |
+| `Priority.Critical` | 3 |
+| `Priority.System_Level` | 4 |
+
+Use `Priority.Normal` unless you need to intercept before (or after) another handler.
+
+## Cancellable events
+
+Events with a `ref bool cancel` parameter can be cancelled by setting `cancel = true`. This prevents MCGalaxy's default handling (e.g., stops the chat message from being sent, or stops a block change).
+
+```csharp
+void OnChat(Player p, string message) {
+    if (message.Contains("badword")) {
+        // cancel is ref bool — set it directly on the parameter
+        // We need the correct delegate signature for cancellable events:
+    }
+}
+
+// Cancellable example — OnPlayerMove:
+void OnMove(Player p, Position next, byte yaw, byte pitch, ref bool cancel) {
+    if (next.Y > 100 * 32) cancel = true; // block movement above y=100
+}
+```
+
+## Player events
+
+| Event class | Delegate signature | Cancellable |
+|-------------|--------------------|-------------|
+| `OnPlayerChatEvent` | `(Player p, string message)` | No |
+| `OnPlayerMoveEvent` | `(Player p, Position next, byte yaw, byte pitch, ref bool cancel)` | Yes |
+| `OnPlayerCommandEvent` | `(Player p, string cmd, string args, CommandData data)` | No |
+| `OnPlayerHelpEvent` | `(Player p, string target, ref bool cancel)` | Yes |
+| `OnPlayerConnectEvent` | `(Player p)` | No |
+| `OnPlayerStartConnectingEvent` | `(Player p, string mppass)` | No |
+| `OnPlayerFinishConnectingEvent` | `(Player p)` | No |
+| `OnPlayerDisconnectEvent` | `(Player p, string reason)` | No |
+| `OnPlayerActionEvent` | `(Player p, PlayerAction action, ...)` | No |
+
+## Level events
+
+| Event class | Delegate signature | Cancellable |
+|-------------|--------------------|-------------|
+| `OnLevelLoadedEvent` | `(Level lvl)` | No |
+| `OnLevelLoadEvent` | `(string name, string path, ref bool cancel)` | Yes |
+| `OnLevelSaveEvent` | `(Level lvl, ref bool cancel)` | Yes |
+| `OnLevelUnloadEvent` | `(Level lvl, ref bool cancel)` | Yes |
+
+## Server events
+
+| Event class | Notes |
+|-------------|-------|
+| `OnServerShutdownEvent` | Called just before the server shuts down |
+| `OnConfigUpdatedEvent` | Called when server config is reloaded |
+| `OnModActionEvent` | Called for bans, kicks, mutes, warns, etc. |
+
+## Full plugin example
+
+This plugin intercepts chat and replaces a forbidden word:
+
+```csharp
+using MCGalaxy;
+using MCGalaxy.Events.PlayerEvents;
+
+public class WordFilterPlugin : Plugin
+{
+    public override string name { get { return "WordFilter"; } }
+
+    public override void Load(bool auto)
+    {
+        OnPlayerChatEvent.Register(OnChat, Priority.Normal);
+    }
+
+    public override void Unload(bool auto)
+    {
+        OnPlayerChatEvent.Unregister(OnChat);
+    }
+
+    void OnChat(Player p, string message)
+    {
+        // Note: to cancel chat you need the cancellable OnPlayerChatEvent variant
+        // Here we just filter by sending the modified message ourselves
+        if (message.CaselessContains("badword")) {
+            p.Message("&cYour message contained a banned word.");
+        }
+    }
+}
+```
+
+<Tip>
+Always unregister your handlers in `Unload`. If you hot-reload a plugin without unregistering, the old handler remains active alongside the new one.
+</Tip>

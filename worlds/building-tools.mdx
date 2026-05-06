@@ -1,0 +1,225 @@
+---
+title: "Building tools and drawing commands"
+description: "Use MCGalaxy's drawing commands to fill cuboids, draw spheres and lines, replace blocks, undo changes, and paint with brushes across marked selections."
+---
+
+MCGalaxy ships with a rich set of drawing commands that let you manipulate large areas of blocks at once. Most draw commands work by asking you to **mark** one or two positions in the world, then applying an operation across the selected region. Brushes, paint mode, and static mode give you fine-grained control over how blocks are placed.
+
+## Marking selections
+
+Most draw commands prompt you to mark two corners of a cuboid selection after you run them. Mark a position by **clicking any block** in the world. You can also mark the exact spot you are standing with:
+
+```bash
+/mark             # Mark at your current position
+/mark [x] [y] [z] # Mark at specific coordinates
+```
+
+After marking both corners, the draw operation executes immediately. Press **Escape** or run `/abort` to cancel a pending selection.
+
+<Note>
+  Draw commands can be disabled per-level with `/map drawing off`. Players receive an error if they attempt a draw command on a level where drawing is restricted.
+</Note>
+
+## Command categories
+
+<CardGroup cols={2}>
+  <Card title="Shape commands" icon="cube">
+    Fill volumes and draw geometric shapes between two marked points.
+
+    ```bash
+    /cuboid [mode] <block>
+    /sphere [radius] <block>
+    /line <block>
+    /triangle <block>
+    /torus <block>
+    ```
+  </Card>
+  <Card title="Selection tools" icon="copy">
+    Copy, paste, and transform a saved block selection.
+
+    ```bash
+    /copy
+    /paste
+    /mirror [axis]
+    /rotate [degrees]
+    /spin [axis] [degrees]
+    ```
+  </Card>
+  <Card title="Replace commands" icon="arrows-rotate">
+    Swap one block type for another across a selection.
+
+    ```bash
+    /replace [old] [new]
+    /replacenot [keep] [new]
+    /replacebrush [old] <brush args>
+    ```
+  </Card>
+  <Card title="Fill and undo" icon="wand-magic-sparkles">
+    Flood-fill a contiguous area or reverse recent changes.
+
+    ```bash
+    /fill <block>
+    /undo [timespan]
+    /redo
+    ```
+  </Card>
+</CardGroup>
+
+## Shape commands in detail
+
+### /cuboid
+
+```bash
+/cuboid <brush args>
+/cuboid [mode] <brush args>
+```
+
+Fills a rectangular box between two marked corners. Shortcut: `/z`.
+
+Modes: `solid`, `hollow`, `walls`, `holes`, `wire`, `random`
+
+```bash
+/cuboid              # Solid box with held block
+/cuboid hollow       # Hollow shell only
+/cuboid walls        # Four walls, no floor or ceiling
+/z wire stone        # Wireframe outline in stone
+```
+
+### /sphere
+
+```bash
+/sphere <block>
+/sphere hollow <block>
+```
+
+Draws a filled or hollow sphere. Mark the centre first, then a point on the surface to set the radius.
+
+### /line
+
+```bash
+/line <block>
+```
+
+Draws a straight line of blocks between two marked points.
+
+### /copy and /paste
+
+```bash
+/copy              # Save the marked selection to your clipboard
+/paste             # Paste the clipboard at a new marked position
+```
+
+The pasted copy inherits the relative offset from where you copied. Use `/mirror` after copying to flip the clipboard before pasting.
+
+### /replace and /replacenot
+
+```bash
+/replace [old block] [new block]      # Replace all [old] with [new] in the selection
+/replacenot [kept block] [new block]  # Replace everything except [kept] with [new]
+```
+
+Both commands accept `all` as the old block to match every block type.
+
+### /fill
+
+```bash
+/fill <block>
+```
+
+Flood-fills a contiguous region starting from the block you click, replacing all touching blocks of the same type. Works like a 3D paint-bucket tool.
+
+### /mirror
+
+```bash
+/mirror [x/y/z]
+```
+
+Mirrors the current clipboard along the given axis. Run after `/copy` and before `/paste`.
+
+## Undo and redo
+
+```bash
+/undo                   # Undo your last draw operation
+/undo [timespan]        # Undo all your block changes in the past [timespan]
+/undo physics [timespan] # Undo physics changes on the current map
+/redo                   # Redo the last undone draw operation
+```
+
+Timespan format examples: `30s`, `5m`, `2h`, `all`.
+
+<Tip>
+  `/undo` with no argument undoes only your most recent draw operation (e.g. one `/cuboid` call). Use `/undo [timespan]` when you need to roll back multiple manual block placements.
+</Tip>
+
+## Brushes
+
+Brushes control **which blocks** a draw command places. Set your active brush with:
+
+```bash
+/brush [type] <args>
+/brush list             # Show all available brushes
+```
+
+The brush applies to all subsequent draw commands until you change it. Shortcut: `/br`.
+
+| Brush | Description |
+|---|---|
+| `Normal` | Places the specified block (or your held block if none given). Default brush. |
+| `Checkered` | Alternates between two blocks in a checkerboard pattern. |
+| `Striped` | Alternates two blocks diagonally. |
+| `Rainbow` | Cycles through all colour wool blocks. |
+| `BWRainbow` | Cycles through black-and-white wool blocks. |
+| `Random` | Randomly selects from a list of blocks you provide. |
+| `Cloudy` | Randomly places blocks with weighted frequency. |
+| `Grid` | Draws a grid of one block with another as the cell fill. |
+| `Paste` | Uses blocks from the current `/copy` clipboard. |
+
+Examples:
+
+```bash
+/brush normal stone          # All draw ops place stone
+/brush checkered red blue    # Alternates red and blue wool
+/brush rainbow               # Cycles through wool colours
+/brush random stone dirt sand 3  # 3× more sand than stone or dirt
+```
+
+## Paint and static modes
+
+### /paint
+
+```bash
+/paint
+```
+
+Toggles **paint mode** on or off. When active, deleting a block replaces it with your currently held block instead of removing it. Shortcut: `/p`.
+
+### /static
+
+```bash
+/static [command]
+```
+
+Toggles **static mode**, which keeps a draw command active after each use so you can repeat it without re-running the command. Shortcut: `/t`.
+
+```bash
+/static cuboid    # Keeps /cuboid active after each fill
+```
+
+## /imageprint — print images as blocks
+
+```bash
+/imageprint [url or filename] [direction] [palette]
+```
+
+Converts an image into a wall of blocks. Place the file in `extra/images/` on the server or supply a URL. Mark one corner to set the origin.
+
+Direction options: `up`, `down`, `left`, `right`, `toward`, `away`  
+Palette options: `color`, `blackwhite`, `bw2` (run `/palette list` in-game for all palettes)
+
+```bash
+/imageprint mylogo.png up color
+```
+
+<Note>
+  `/imageprint` requires Admin rank by default and is disabled in museum mode.
+</Note>

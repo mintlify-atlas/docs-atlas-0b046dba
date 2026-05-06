@@ -1,0 +1,106 @@
+---
+title: "AI bots: scripted entities in MCGalaxy"
+description: "Create programmable bots in MCGalaxy that patrol areas, follow players, hunt targets, or guard zones using simple AI instructions."
+---
+
+MCGalaxy bots are server-side entities that appear as players on a level and execute a sequence of scripted AI instructions. Bots can walk predefined patrol routes, chase the nearest player, kill on contact, or perform purely cosmetic actions like spinning and nodding. They are stored per-level and automatically reload when the server restarts.
+
+## Managing bots
+
+### Creating and removing bots
+
+```
+/Bot add [name]
+```
+Spawns a new bot at your current position on the level. The bot is owned by the player who created it.
+
+```
+/Bot remove [name]
+```
+Removes the named bot from the level permanently.
+
+```
+/Bot remove all
+```
+Removes every bot on your current level (requires operator permission).
+
+```
+/BotSummon [name]
+```
+Teleports the bot to your current position. You can also supply explicit coordinates: `/BotSummon [name] <x> <y> <z>`.
+
+### Listing bots
+
+```
+/Bots
+```
+Lists all bots on your current level along with their AI script names and status. Use `/Bots [level]` to inspect bots on another level.
+
+### Configuring appearance
+
+```
+/BotSet [name] <AI script>
+```
+Assigns a named AI script to a bot, or sets its simple `hunt` / `kill` flag directly. Omitting the AI script turns off the bot's AI.
+
+<Note>
+To change a bot's displayed name tag without renaming it internally, use `/Nick bot [name] [new display name]`. To update its model or skin, use the `/Skin` and `/Model` commands.
+</Note>
+
+## AI instructions with `/BotAI`
+
+Bot behaviours are defined as named AI script files stored in the `bots/` directory. Use `/BotAI add [script] [instruction]` to append instructions and `/BotSet [bot] [script]` to assign the script to a bot.
+
+```
+/BotAI add [name] [instruction] <args>
+/BotAI del [name]
+/BotAI del [name] last
+/BotAI info [name]
+/BotAI list
+```
+
+### Available instructions
+
+| Instruction | Arguments | Description |
+|---|---|---|
+| `hunt` | `<radius>` | Move towards the closest player within radius (default 75 blocks). Stops when overlapping the player. |
+| `kill` | — | Kill any player the bot is currently touching. |
+| `stare` | `<radius>` | Rotate to face the closest player within radius (default 1000 blocks); does not move. |
+| `walk` | — | Walk towards a saved waypoint position (bot faces the target). |
+| `move` | — | Move towards a saved waypoint position without changing facing direction. |
+| `teleport` | — | Instantly teleport to the saved position. |
+| `jump` | — | Perform a jump. Can be combined with other movement instructions. |
+| `speed` | `<percentage>` | Set movement speed relative to normal (100 = normal, 50 = half speed). |
+| `spin` | `<interval> <speed>` | Spin for a period of time. Interval in tenths of a second. |
+| `nod` | `<interval> <speed>` | Nod up and down for a period of time. Interval in tenths of a second. |
+| `wait` | `<interval>` | Stay still for a period of time. Interval in tenths of a second. |
+| `reset` | — | Loop back to the first instruction in the script. |
+| `remove` | — | Remove the bot from the level when reached. |
+| `linkscript` | `[ai name]` | Switch to a different AI script and continue executing from there. |
+
+<Tip>
+Chain `walk` with `reset` to create a looping patrol route. Record each waypoint by standing at the desired position and running `/BotAI add [name] walk`, then end the loop with `/BotAI add [name] reset`.
+</Tip>
+
+### Example: simple patrol loop
+
+```
+/BotAI add patrol walk    # waypoint 1 (your current position)
+/BotAI add patrol walk    # waypoint 2
+/BotAI add patrol walk    # waypoint 3
+/BotAI add patrol reset   # loop back to waypoint 1
+/BotSet mybot patrol
+```
+
+### Example: hunter bot
+
+```
+/BotAI add chaser hunt 50   # chase nearest player within 50 blocks
+/BotAI add chaser kill       # kill on contact
+/BotAI add chaser reset      # repeat
+/BotSet guardbot chaser
+```
+
+## Persistence
+
+Bot positions, AI scripts, and ownership are saved to `levels/bots/[levelname].bots` and are restored automatically every time the level loads. Bots do not persist across level deletions.

@@ -1,0 +1,163 @@
+---
+title: "Ranks and permissions in MCGalaxy"
+description: "Configure player ranks, set minimum permissions for commands, and control who can build, visit levels, or access restricted features in MCGalaxy."
+---
+
+MCGalaxy uses a rank (group) system to control what players can do on your server. Every player belongs to exactly one rank, and each rank carries a numeric permission level that determines which commands and blocks are available. Ranks are stored in `groups.properties` and can be created, edited, or removed without restarting the server.
+
+## Built-in ranks
+
+The following ranks are defined by default, listed from lowest to highest permission level. The permission level numbers are fixed reference points; custom ranks can use any integer between -20 and 120.
+
+| Rank        | Permission level | Default color |
+|-------------|-----------------|---------------|
+| Banned      | -20             | `&8` (dark grey) |
+| Guest       | 0               | `&7` (grey) |
+| Builder     | 30              | `&2` (dark green) |
+| AdvBuilder  | 50              | `&3` (teal) |
+| Operator    | 80              | `&c` (red) |
+| Admin       | 100             | `&e` (yellow) |
+| Owner       | 120             | `&4` (dark red) |
+
+`Console` is a special internal rank (not stored in `groups.properties`) used by the server console and IRC bots.
+
+<Note>
+Rank names are case-insensitive. `op` is automatically treated as an alias for `operator`. You cannot name a rank `op` or `console`.
+</Note>
+
+## Setting a player's rank
+
+Use `/SetRank` (shortcut: `/Rank`) to change a player's rank in-game:
+
+```
+/SetRank [player] [rankname] <reason>
+```
+
+You can also promote or demote one step at a time:
+
+```
+/SetRank +up [player] <reason>
+/SetRank -down [player] <reason>
+```
+
+Aliases `/Promote` and `/Demote` (shortcuts `pr` and `de`) do the same thing. You cannot set a player to a rank equal to or higher than your own.
+
+To view the list of available ranks:
+
+```
+/ViewRanks
+```
+
+## Configuring ranks
+
+Ranks are configured in `groups.properties`. Each entry starts with `RankName = <name>` followed by key-value pairs. A minimal entry looks like this:
+
+```properties
+RankName = Builder
+Permission = 30
+Color = &2
+Limit = 4096
+MaxUndo = 300
+OSMaps = 3
+AfkKicked = true
+AfkKickMinutes = 45
+Prefix =
+GenVolume = 30000000
+CopySlots = 1
+MOTD =
+```
+
+<AccordionGroup>
+  <Accordion title="Permission">
+    The numeric permission level of the rank. Must be an integer between -20 and 120. Higher values grant access to more commands and blocks. No two ranks may share the same permission level. The default ranks use: Banned = -20, Guest = 0, Builder = 30, AdvBuilder = 50, Operator = 80, Admin = 100, Owner = 120.
+  </Accordion>
+
+  <Accordion title="Color">
+    The chat and tab-list color for players of this rank. Uses Minecraft Classic color codes (e.g. `&2` for dark green). This color appears before the player's name in chat.
+  </Accordion>
+
+  <Accordion title="Limit">
+    The maximum number of blocks a player can affect with a single drawing command (e.g. `/Cuboid`, `/Sphere`). Must be greater than 0. The default ranks range from 1 (Banned/Guest) up to 134,217,728 (Owner). Operators can adjust a player's individual limit in-game with `/Limit`.
+  </Accordion>
+
+  <Accordion title="MaxUndo">
+    The maximum number of seconds back that players of this rank can undo another player's block changes with `/UndoPlayer`. Measured in seconds. A very large value (like `21024000`, roughly 243 days) effectively means no limit.
+  </Accordion>
+
+  <Accordion title="OSMaps">
+    The maximum number of personal Overseer (`/os`) maps players of this rank can own. Default is 3 for Guest and Builder; Owner defaults to 256.
+  </Accordion>
+
+  <Accordion title="AfkKicked and AfkKickMinutes">
+    `AfkKicked` (`true`/`false`) controls whether players of this rank are automatically kicked after being AFK. `AfkKickMinutes` sets the number of minutes before the kick triggers. Players with Builder rank or lower default to 45 minutes; higher ranks default to 60 minutes.
+  </Accordion>
+
+  <Accordion title="Prefix">
+    A string that always appears immediately before the player's name in chat. Leave blank for no prefix. For example, setting `Prefix = + ` would display `+ PlayerName` in chat.
+  </Accordion>
+
+  <Accordion title="GenVolume">
+    The maximum map volume (width × height × length) that players of this rank can generate. For example, a 512 × 256 × 512 map has a volume of 67,108,864. Default for most ranks is 30,000,000 (roughly a 310³ cube). Admin and Owner default to 225,000,000.
+  </Accordion>
+
+  <Accordion title="CopySlots">
+    The number of copy slots available to players of this rank. Each copy slot stores one clipboard selection from `/Copy`. Default is 1. Use `/CopySlot` to switch between slots in-game.
+  </Accordion>
+
+  <Accordion title="MOTD">
+    A rank-specific message of the day shown when players of this rank join a level. Leave blank to use the server or level MOTD instead.
+  </Accordion>
+</AccordionGroup>
+
+## Setting command permissions
+
+Use `/CmdSet` to change the minimum rank required to use any command:
+
+```
+/CmdSet [command] [rank]
+```
+
+For example, to allow Builders to use `/Freeze`:
+
+```
+/CmdSet Freeze Builder
+```
+
+Some commands have extra permission tiers (for sub-actions that require a higher rank). To set those:
+
+```
+/CmdSet [command] [rank] [extra permission number]
+```
+
+Advanced syntax for allowing or blocking a specific rank:
+
+```
+/CmdSet [command] +[rank]   # explicitly allow this rank
+/CmdSet [command] -[rank]   # explicitly deny this rank
+```
+
+Command permissions are saved to `cmdperms.properties` and take effect immediately.
+
+## Build and delete permissions per rank
+
+Each rank has independent allow-lists for which blocks it can place (`CanPlace`) and which it can delete (`CanDelete`). These are controlled with `/BlockSet`:
+
+```
+/BlockSet [block] +[rank]   # allow rank to place/delete block
+/BlockSet [block] -[rank]   # deny rank
+```
+
+## Level visit and build permissions
+
+Levels can restrict who may visit or build on them using `/PermissionVisit` and `/PermissionBuild`:
+
+```
+/PermissionVisit [rank]
+/PermissionBuild [rank]
+```
+
+These set the minimum rank required to visit or place/delete blocks on the current level.
+
+<Tip>
+Players can use `/Map pervisit [rank]` and `/Map perbuild [rank]` as shorter alternatives when already on the level they want to configure.
+</Tip>

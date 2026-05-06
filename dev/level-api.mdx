@@ -1,0 +1,102 @@
+---
+title: "Level API reference for MCGalaxy plugins"
+description: "Key Level class members for plugin developers: reading dimensions, getting and setting blocks, accessing config, and finding loaded worlds."
+---
+
+The `Level` class represents a loaded world. You can access the player's current level via `p.level`, iterate all loaded levels via `LevelInfo.Loaded`, or look one up by name with `LevelInfo.FindExact`. This page covers the members most useful in plugin development.
+
+## Identity and dimensions
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `lvl.name` | `string` | Level name (used as its identifier) |
+| `lvl.MapName` | `string` | Map file name without extension |
+| `lvl.ColoredName` | `string` | Name with config color prefix |
+| `lvl.Width` | `ushort` | Number of blocks in the X dimension |
+| `lvl.Height` | `ushort` | Number of blocks in the Y dimension |
+| `lvl.Length` | `ushort` | Number of blocks in the Z dimension |
+| `lvl.MaxX` | `int` | `Width - 1` |
+| `lvl.MaxY` | `int` | `Height - 1` |
+| `lvl.MaxZ` | `int` | `Length - 1` |
+| `lvl.IsMuseum` | `bool` | Whether the level is read-only museum mode |
+
+## Config
+
+```csharp
+// Access the level's configuration
+LevelConfig cfg = lvl.Config;
+
+string motd   = cfg.MOTD;
+int physics   = cfg.Physics;   // 0–5
+bool worldChat = cfg.ServerWideChat;
+```
+
+`LevelConfig` contains all options settable via `/map` — visit rank, build rank, MOTD, physics mode, guns, history, and environment settings.
+
+## Reading blocks
+
+```csharp
+// Get the block ID at (x, y, z)
+BlockID block = lvl.GetBlock(x, y, z);
+
+// Check bounds first
+if (x < lvl.Width && y < lvl.Height && z < lvl.Length) {
+    BlockID b = lvl.GetBlock(x, y, z);
+}
+```
+
+`BlockID` is `ushort`. Compare against constants in the `Block` class (e.g., `Block.Air`, `Block.Stone`, `Block.Gold`).
+
+## Setting blocks
+
+```csharp
+// Set a block without triggering physics or notifying players
+lvl.SetBlock(x, y, z, Block.Stone);
+
+// Set a block and update all players + trigger physics
+lvl.Blockchange(x, y, z, Block.Stone);
+```
+
+Use `Blockchange` when you want the change visible to players. Use `SetBlock` for bulk operations followed by a map reload/resend.
+
+## Players on a level
+
+```csharp
+// Iterate all players on this level
+List<Player> players = lvl.players;
+foreach (Player p in players) {
+    p.Message("The level is being reset!");
+}
+```
+
+`lvl.players` returns a `List<Player>` snapshot of all players currently on the level.
+
+## Finding loaded levels
+
+```csharp
+// Find a level by name — case-insensitive, returns null if not loaded
+Level lvl = LevelInfo.FindExact("main");
+
+// Get all loaded levels
+Level[] all = LevelInfo.Loaded.Items;
+```
+
+## Example: counting blocks of a type
+
+```csharp
+void CountBlocks(Level lvl, BlockID target)
+{
+    int count = 0;
+    for (ushort y = 0; y < lvl.Height; y++)
+    for (ushort z = 0; z < lvl.Length; z++)
+    for (ushort x = 0; x < lvl.Width;  x++)
+    {
+        if (lvl.GetBlock(x, y, z) == target) count++;
+    }
+    Logger.Log(LogType.SystemActivity, "Found {0} blocks of type {1} in {2}", count, target, lvl.name);
+}
+```
+
+<Warning>
+Iterating every block in a large level is expensive. For worlds larger than 256×256×256, do this in a background thread or scheduled task to avoid blocking the main server loop.
+</Warning>

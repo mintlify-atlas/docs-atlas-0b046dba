@@ -1,0 +1,236 @@
+---
+title: "Moderating players on your MCGalaxy server"
+description: "Use MCGalaxy's built-in moderation tools to ban, mute, freeze, warn, and monitor players — with BlockDB undo and action logging."
+---
+
+MCGalaxy includes a complete set of moderation tools that can be used both in-game by ranked players and from the server console. Every moderation action fires an internal event that is logged and, in most cases, announced to online staff. Reasons can reference server rules by number using the shorthand `@1`, `@2`, etc. (expands to the matching rule text).
+
+<Note>
+When issuing commands from the server console, omit the `/` prefix. For example, use `ban PlayerName reason` rather than `/ban PlayerName reason`.
+</Note>
+
+## Moderation command reference
+
+| Command | Shortcut | Default rank | Syntax |
+|---------|----------|-------------|--------|
+| `/Ban` | `KickBan`, `kb` | Operator | `/Ban [player] <reason>` |
+| `/Unban` | | Operator | `/Unban [player] <reason>` |
+| `/BanIP` | `bi`, `IPBan` | Operator | `/BanIP [ip/player] <reason>` |
+| `/UnbanIP` | | Operator | `/UnbanIP [ip] <reason>` |
+| `/XBan` | `BanX` | Operator | `/XBan [player] <reason>` |
+| `/TempBan` | `tb` | AdvBuilder | `/TempBan [player] [timespan] <reason>` |
+| `/Kick` | `k` | AdvBuilder | `/Kick [player] <reason>` |
+| `/Mute` | | Operator | `/Mute [player] <timespan> <reason>` |
+| `/Unmute` | | Operator | `/Unmute [player] <reason>` |
+| `/Freeze` | `fz` | Operator | `/Freeze [player] [timespan] <reason>` |
+| `/Warn` | | AdvBuilder | `/Warn [player] <reason>` |
+| `/SetRank` | `Rank` | Operator | `/SetRank [player] [rank] <reason>` |
+| `/UndoPlayer` | `up` | Operator | `/UndoPlayer [player] <timespan>` |
+| `/BlockDB` | | Operator | `/BlockDB [player/check] <options>` |
+| `/Whitelist` | | Operator | `/Whitelist add/del/list/enable/disable` |
+| `/Report` | | Guest | `/Report [player] [reason]` |
+| `/Patrol` | | AdvBuilder | `/Patrol` |
+
+---
+
+## Command details
+
+### /Ban
+
+Permanently bans a player. If the player is online, they are kicked immediately. Ban details (who issued the ban, the reason, and the player's previous rank) are stored in `text/bans.txt`.
+
+```
+/Ban [player] <reason>
+/Ban PlayerName @1
+```
+
+### /BanIP
+
+Bans an IP address. You can pass a player's name instead of an IP — MCGalaxy will look up the IP of that player. The server will refuse IP bans on IPs shared with higher-ranked accounts (configurable via `ProtectStaffIPs`).
+
+```
+/BanIP [ip/player] <reason>
+/BanIP PlayerName griefing
+```
+
+### /XBan
+
+Combines `/UndoPlayer all`, `/BanIP`, and `/Ban` into a single command. Use this for serious rule violations where you want to undo all damage, IP ban, and ban in one step. Use `/UBan` (alias for `/XBan -noip`) if you do not want to IP ban.
+
+```
+/XBan [player] <reason>
+```
+
+### /TempBan
+
+Bans a player for a limited time. The default duration is 1 hour if no timespan is specified. Timespan format: `1h30m`, `2d`, `45m`, etc.
+
+```
+/TempBan [player] [timespan] <reason>
+/TempBan PlayerName 2h spamming
+```
+
+### /Kick
+
+Disconnects a player from the server without banning them. The kick reason is shown in the player's disconnect message.
+
+```
+/Kick [player] <reason>
+```
+
+### /Mute
+
+Prevents a player from sending chat messages. If no timespan is given, the server's configured auto-mute timespan is used. A timespan of `0` makes the mute permanent until manually removed.
+
+```
+/Mute [player] <timespan> <reason>
+/Mute PlayerName 10m spamming
+/Unmute PlayerName
+```
+
+### /Freeze
+
+Prevents a player from moving for the specified timespan, or until manually unfrozen with another `/Freeze` on the same player.
+
+```
+/Freeze [player] [timespan] <reason>
+/Freeze PlayerName 5m
+```
+
+### /Warn
+
+Sends a visible warning to a player. After three warnings, the player is automatically kicked.
+
+```
+/Warn [player] <reason>
+```
+
+---
+
+## Banning someone properly
+
+The following steps walk through banning a griefer, undoing their damage, and IP-banning to prevent evasion.
+
+<Steps>
+  <Step title="Identify the player">
+    Use `/Whois [player]` to confirm their current rank, IP, and account name. Use `/BanInfo [player]` to check if they have a previous ban history.
+  </Step>
+
+  <Step title="Undo their block changes">
+    Use `/UndoPlayer [player] [timespan]` to revert their recent block placements. For example, `/UndoPlayer Griefer 1h` undoes changes from the past hour. Omitting the timespan defaults to 30 minutes.
+
+    ```
+    /UndoPlayer Griefer 2h
+    ```
+  </Step>
+
+  <Step title="Ban the player">
+    Use `/Ban` to permanently ban them with a reason. This kicks them if online and records the ban.
+
+    ```
+    /Ban Griefer griefing spawn area
+    ```
+
+    To ban, IP-ban, and undo in one command, use `/XBan`:
+
+    ```
+    /XBan Griefer griefing spawn area
+    ```
+  </Step>
+
+  <Step title="IP-ban if needed">
+    If the player is likely to create new accounts, also run `/BanIP` with their name or IP to block the address.
+
+    ```
+    /BanIP Griefer ban evasion prevention
+    ```
+  </Step>
+
+  <Step title="Verify">
+    Run `/BanInfo Griefer` to confirm the ban was recorded with the correct reason, banner, and timestamp.
+  </Step>
+</Steps>
+
+---
+
+## BlockDB: tracking and undoing block changes
+
+MCGalaxy records every block placement and deletion in a per-level BlockDB database. This lets you look up who changed a block and when, and undo a player's changes with precision.
+
+**Query block history at your current position:**
+
+```
+/BlockDB check
+```
+
+**Undo a player's changes on the current level:**
+
+```
+/UndoPlayer [player] <timespan>
+```
+
+Omitting the timespan defaults to 30 minutes. To undo all recorded changes:
+
+```
+/UndoPlayer [player] all
+```
+
+To undo changes only within a specific region, use:
+
+```
+/UndoPlayer -area [player] <timespan>
+```
+
+This prompts you to mark two corners. The alias `/XUndo` is equivalent to `/UndoPlayer [player] all`.
+
+<Note>
+`/UndoPlayer` requires the target player's rank to be lower than yours. The maximum undo timespan is set per rank by the `MaxUndo` field in `groups.properties`.
+</Note>
+
+---
+
+## Admin verification (/pass)
+
+`/Pass` allows staff with a configured password to authenticate before taking sensitive actions. When verification is enabled in the server config, affected staff must run `/Pass [password]` each session after joining. Usage of `/Pass` is not logged to prevent password exposure in logs.
+
+---
+
+## Whitelist
+
+The whitelist restricts server access to approved players only. When enabled, any player not on the whitelist is refused entry.
+
+```
+/Whitelist enable          # turn on whitelist-only mode
+/Whitelist disable         # turn off whitelist-only mode
+/Whitelist add [player]    # add a player to the whitelist
+/Whitelist del [player]    # remove a player from the whitelist
+/Whitelist list            # show all whitelisted players
+```
+
+Enabling or disabling whitelist mode requires Admin rank (extra permission 1 on `/Whitelist`).
+
+---
+
+## Player reports (/report)
+
+Any player can submit a report about another player. Reports are stored in `extra/reported/` and notify online operators.
+
+```
+/Report [player] [reason]        # submit a report
+/Report list                     # list reported players (Operator+)
+/Report check [player]           # view reports for a player (Operator+)
+/Report delete [player]          # dismiss reports for a player (Operator+)
+/Report clear                    # clear all reports (Operator+)
+```
+
+A player can have a maximum of 5 active reports before operators must review and clear them.
+
+---
+
+## Patrol (/patrol)
+
+`/Patrol` teleports you to a randomly selected player who has not been visited in the last 15 seconds. Builders (extra permission 1) are excluded from patrol by default. This is useful for spot-checking player activity across the server without teleporting to each person manually.
+
+```
+/Patrol
+```

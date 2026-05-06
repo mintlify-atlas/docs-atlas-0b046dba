@@ -1,0 +1,87 @@
+---
+title: "MCGalaxy server configuration reference"
+description: "Complete reference for MCGalaxy's server.properties settings: name, MOTD, player limits, main level, heartbeat, physics, and more."
+---
+
+All core server settings live in `server.properties` in the server's root directory. The file is created with sensible defaults on first run and is reloaded automatically when you click **Save** in the MCGalaxy GUI or run `/server reload` in-game. Changes to most settings take effect immediately without restarting the server.
+
+## Server
+
+These settings control basic server identity and connectivity.
+
+| Property | Default | Description |
+|---|---|---|
+| `server-name` | `[MCGalaxy] Default` | The name shown in the server list and in-game tab list. Supports colour codes. |
+| `motd` | `Welcome!` | Message of the Day sent to players on join. Supports colour codes and CPE MOTD flags. |
+| `max-players` | `16` | Maximum number of simultaneous players (up to the server hard limit). |
+| `max-guests` | `14` | Maximum number of guest-rank players allowed at one time. |
+| `port` | `25565` | UDP/TCP port the server listens on. |
+| `public` | `false` | If `true`, the server sends heartbeats to classicube.net and appears in the public server list. |
+| `verify-names` | `true` | Validate player logins against classicube.net. Prevents name spoofing. |
+| `default-rank` | `guest` | Rank assigned to new players on first join. |
+| `server-owner` | `the owner` | Name displayed as the server owner in `/server` output. |
+| `enable-cpe` | `true` | Enable Classic Protocol Extensions (CPE). Disabling this breaks many modern client features. |
+
+## Level
+
+These settings control level loading behaviour and defaults.
+
+| Property | Default | Description |
+|---|---|---|
+| `autoload` | `true` | Automatically load levels from disk when a player tries to visit them. |
+| `world-chat` | `true` | If `true`, chat is server-wide. If `false`, each level has isolated chat. |
+| `main-name` | `main` | Name of the level players spawn on when they first join. |
+| `default-texture-url` | *(empty)* | Default terrain texture URL sent to clients that support CPE texture packs. |
+| `default-texture-pack-url` | *(empty)* | Default texture pack URL (full pack, overrides terrain URL when set). |
+
+## Security
+
+| Property | Default | Description |
+|---|---|---|
+| `use-whitelist` | `false` | If `true`, only players on the whitelist can join. See the [security guide](/configuration/security). |
+| `admin-verification` | `true` | Require operators and above to verify with `/pass` after joining. |
+| `verify-admin-perm` | `Operator` | Minimum rank required to verify identity on join. |
+
+## Update
+
+| Property | Default | Description |
+|---|---|---|
+| `check-updates` | `true` | Check for MCGalaxy updates on startup and notify the console. |
+
+## Other
+
+| Property | Default | Description |
+|---|---|---|
+| `agree-to-rules-on-entry` | `false` | Require players to type `/agree` before they can interact with the server. |
+| `admins-join-silent` | `false` | If `true`, admin-rank and above join without a visible join message. |
+| `position-interval` | `100` | How often (in milliseconds) player positions are updated and broadcast. Lower = smoother movement, higher CPU cost. |
+| `HeartbeatURL` | `http://www.classicube.net/heartbeat.jsp` | URL to send server heartbeats to. Only change this if running a private ClassiCube-compatible network. |
+| `support-web-client` | `true` | Accept connections from the ClassiCube web client. |
+| `allow-ip-forwarding` | `true` | Trust the `X-Forwarded-For` header from the web client proxy to obtain real player IPs. |
+| `max-bots-per-level` | `192` | Maximum number of AI bots that can be active on a single level. |
+| `afk-minutes` | `10` | Minutes of inactivity before a player is automatically marked AFK. |
+| `money-name` | `moneys` | Display name for the in-game currency. |
+
+## Example server.properties (excerpt)
+
+```ini
+server-name = My ClassiCube Server
+motd = Welcome! Type /help for commands.
+max-players = 32
+max-guests = 28
+port = 25565
+public = true
+verify-names = true
+default-rank = guest
+main-name = main
+world-chat = true
+autoload = true
+check-updates = true
+agree-to-rules-on-entry = false
+admins-join-silent = false
+position-interval = 100
+```
+
+<Note>
+String values that contain spaces do not need to be quoted. Colour codes using the `&` prefix are supported in `server-name` and `motd`.
+</Note>

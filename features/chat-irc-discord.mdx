@@ -1,0 +1,150 @@
+---
+title: "Chat relays: Discord and IRC integration"
+description: "Relay MCGalaxy server chat to Discord channels or IRC networks. Covers bot token setup, channel configuration, operator-only channels, and admin relay commands."
+---
+
+MCGalaxy can bridge in-game chat to external platforms using built-in relay bot modules. The Discord relay uses the Discord Gateway API, while the IRC relay connects to any standard IRC network. Both relays support a public channel for general chat and a separate operator-only channel for moderation messages such as bans, kicks, and `/review` requests.
+
+<Tabs>
+  <Tab title="Discord">
+    ## Discord relay setup
+
+    The Discord relay is configured in `properties/discordbot.properties`. This file is created automatically with defaults the first time the server starts.
+
+    <Steps>
+      <Step title="Create a Discord bot application">
+        Go to the [Discord Developer Portal](https://discord.com/developers/applications), create a new application, add a Bot user, and copy the **bot token**. Enable the **Message Content Intent** under the Bot settings page.
+      </Step>
+      <Step title="Invite the bot to your server">
+        Generate an invite URL with the `bot` scope and the **Send Messages** and **Read Message History** permissions, then invite it to your Discord server.
+      </Step>
+      <Step title="Find your channel IDs">
+        Enable **Developer Mode** in Discord (Settings → Advanced), then right-click a channel and select **Copy Channel ID**.
+      </Step>
+      <Step title="Edit discordbot.properties">
+        ```ini
+        enabled = true
+        bot-token = YOUR_BOT_TOKEN_HERE
+
+        # Comma-separated channel IDs for public chat relay
+        channel-ids = 123456789012345678
+
+        # Comma-separated channel IDs for operator messages (bans, kicks, reviews)
+        op-channel-ids = 987654321098765432
+        ```
+      </Step>
+      <Step title="Restart the relay">
+        Either restart the server or run `/DiscordBot reset` in-game to apply the new configuration without a full restart.
+      </Step>
+    </Steps>
+
+    ### What gets relayed
+
+    | Direction | Events |
+    |---|---|
+    | Game → Discord (`channel-ids`) | Player chat, join/leave messages, game status updates |
+    | Game → Discord (`op-channel-ids`) | Bans, kicks, mutes, `/review` requests, operator actions |
+    | Discord → Game | Messages posted in the configured channels appear in in-game chat |
+
+    ### Admin commands
+
+    | Command | Description |
+    |---|---|
+    | `/DiscordBot connect` | Connect the Discord bot |
+    | `/DiscordBot disconnect` | Disconnect the Discord bot |
+    | `/DiscordBot reset` | Disconnect then reconnect (reloads config) |
+    | `/DiscordControllers` | Manage which Discord users can run server commands via the bot |
+
+    ### Presence and status
+
+    The bot's Discord status message can display live player counts. Configure `presence-enabled`, `presence-status` (`online`, `dnd`, `idle`, `invisible`), and `status-message` (supports the `{PLAYERS}` token) in `discordbot.properties`.
+
+    <Warning>
+    Keep `can-mention-everyone = false` (the default). Enabling it allows any in-game player to ping @everyone or @here on your Discord server.
+    </Warning>
+  </Tab>
+  <Tab title="IRC">
+    ## IRC relay setup
+
+    IRC settings are stored directly in `server.properties` under the `[IRC bot]` section.
+
+    <Steps>
+      <Step title="Enable IRC in server.properties">
+        ```ini
+        irc = true
+        irc-server = irc.esper.net
+        irc-port = 6697
+        irc-nick = ForgeBot
+        ```
+        Port 6697 automatically enables SSL/TLS. Set `irc-ssl = true` explicitly if using a different SSL port.
+      </Step>
+      <Step title="Configure channels">
+        ```ini
+        # Public channel — general chat relay
+        irc-channel = #my-server
+
+        # Operator channel — moderation messages only
+        irc-opchannel = #my-server-ops
+        ```
+        Both settings accept a comma-separated list of channels.
+      </Step>
+      <Step title="Optionally identify with NickServ">
+        ```ini
+        irc-identify = true
+        irc-nickserv-name = NickServ
+        irc-password = yourpassword
+        ```
+      </Step>
+      <Step title="Restart the relay">
+        Either restart the server or run `/IRCBot reset` in-game to reconnect with the updated settings.
+      </Step>
+    </Steps>
+
+    ### What gets relayed
+
+    | Direction | Events |
+    |---|---|
+    | Game → IRC (`irc-channel`) | Player chat, join/leave messages |
+    | Game → IRC (`irc-opchannel`) | Bans, kicks, mutes, operator actions |
+    | IRC → Game | Messages in the configured channels appear in in-game chat |
+
+    Optional extras can be enabled per server:
+
+    ```ini
+    irc-player-titles = true       # Include rank titles in relayed names
+    irc-show-world-changes = false # Relay level load/unload events
+    irc-show-afk = false           # Relay AFK status changes
+    ```
+
+    ### Admin commands
+
+    | Command | Description |
+    |---|---|
+    | `/IRCBot connect` | Connect the IRC bot |
+    | `/IRCBot disconnect` | Disconnect the IRC bot |
+    | `/IRCBot reset` | Disconnect then reconnect (aliases: `/ResetBot`, `/ResetIRC`) |
+    | `/IRCControllers` | Manage which IRC users can run server commands via the bot (shortcut: `/IRCCtrl`) |
+
+    ### IRC controller verification
+
+    To allow privileged IRC users to run in-game commands via the bot, set `irc-controller-verify`:
+
+    ```ini
+    irc-controller-verify = HalfOp   # Options: None, HalfOp, OpChannel
+    irc-controller-rank = admin       # In-game rank granted to controllers
+    irc-command-prefix = .x           # Prefix for commands sent from IRC
+    ```
+
+    <Note>
+    IRC users in the `ranks/IRC_Controllers.txt` list can run in-game commands by prefixing them with the configured `irc-command-prefix` (default `.x`) in the IRC channel.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Chat formatting
+
+MCGalaxy colour codes (`&a`, `&c`, etc.) are stripped before messages are sent to Discord or IRC. Discord messages are converted from Markdown to plain text before appearing in-game. IRC formatting codes (bold, colour) are similarly stripped when forwarded to in-game chat.
+
+<Note>
+Both relay bots are independent modules. You can run Discord-only, IRC-only, or both simultaneously. Disable either relay by setting `enabled = false` (Discord) or `irc = false` (IRC) in the respective config file.
+</Note>

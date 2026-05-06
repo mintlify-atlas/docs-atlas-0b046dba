@@ -1,0 +1,95 @@
+---
+title: "Configuration API: reading and writing settings"
+description: "Access Server.Config for core server settings, and add typed configuration fields to your own plugins using MCGalaxy's ConfigAttribute system."
+---
+
+MCGalaxy uses a declarative attribute-based configuration system. Fields decorated with `[ConfigString]`, `[ConfigBool]`, `[ConfigInt]`, and similar attributes are automatically serialised to and deserialised from `.properties` files. You can use the same system in your own plugins.
+
+## Reading core server settings
+
+The global server configuration is available via `Server.Config`, which is a `ServerConfig` instance. You can read any setting at runtime:
+
+```csharp
+string serverName = Server.Config.Name;
+int maxPlayers    = Server.Config.MaxPlayers;
+bool isPublic     = Server.Config.Public;
+string mainLevel  = Server.Config.MainLevel;
+```
+
+See `MCGalaxy/Server/ServerConfig.cs` for the full list of fields and their defaults.
+
+## Adding config to your plugin
+
+Decorate public fields with config attributes, then call `ConfigElement.Serialise` / `Deserialise` to read and write a properties file.
+
+### Available attribute types
+
+| Attribute | Field type | Example |
+|-----------|-----------|---------|
+| `[ConfigString("key", "Section", "default")]` | `string` | Server name, URLs |
+| `[ConfigBool("key", "Section", false)]` | `bool` | Feature toggles |
+| `[ConfigInt("key", "Section", 0, min, max)]` | `int` | Numeric limits |
+| `[ConfigPerm("key", "Section", LevelPermission.Guest)]` | `LevelPermission` | Rank thresholds |
+| `[ConfigColor("key", "Section", "&f")]` | `string` | Color codes |
+
+### Example: plugin with saved settings
+
+```csharp
+using System;
+using System.IO;
+using MCGalaxy;
+using MCGalaxy.Config;
+
+public class MyPlugin : Plugin
+{
+    public override string name { get { return "MyPlugin"; } }
+
+    // Config fields
+    [ConfigString("welcome-message", "MyPlugin", "Welcome!")]
+    public static string WelcomeMessage = "Welcome!";
+
+    [ConfigBool("show-join", "MyPlugin", true)]
+    public static bool ShowJoin = true;
+
+    const string CONFIG_FILE = "plugins/myplugin.properties";
+
+    public override void Load(bool auto)
+    {
+        LoadConfig();
+    }
+
+    public override void Unload(bool auto) { }
+
+    void LoadConfig()
+    {
+        // Read existing config, or create defaults
+        ConfigElement[] elems = ConfigElement.GetAll(typeof(MyPlugin));
+        PropertiesFile.Read(CONFIG_FILE, (key, value) =>
+            ConfigElement.Parse(elems, this, key, value));
+
+        // Save back to ensure new keys are written with defaults
+        using (StreamWriter w = new StreamWriter(CONFIG_FILE))
+            ConfigElement.Serialise(elems, w, this);
+    }
+}
+```
+
+When `LoadConfig` runs, `WelcomeMessage` and `ShowJoin` are populated from `plugins/myplugin.properties`, or the defaults are used and written if the file doesn't exist yet.
+
+## PropertiesFile helpers
+
+```csharp
+// Read key=value pairs from a file
+PropertiesFile.Read("myfile.properties", (key, value) => {
+    if (key == "mykey") myField = value;
+});
+
+// Write key=value pairs
+using (StreamWriter sw = new StreamWriter("myfile.properties")) {
+    sw.WriteLine("mykey = " + myField);
+}
+```
+
+<Tip>
+Place plugin config files in the `plugins/` directory alongside your DLL so they're easy for server admins to find and edit.
+</Tip>

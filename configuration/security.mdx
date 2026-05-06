@@ -1,0 +1,113 @@
+---
+title: "Security settings for your MCGalaxy server"
+description: "Configure name verification, admin password verification, whitelist mode, IP banning, and staff IP protection to secure your MCGalaxy server."
+---
+
+MCGalaxy provides several layers of protection against impersonation, griefing, and unwanted access. Most settings live in `server.properties` and take effect immediately after saving without a server restart.
+
+## Name verification
+
+```ini
+verify-names = true
+```
+
+When enabled, MCGalaxy contacts classicube.net during login to confirm that each player's username and session token match. This prevents players from connecting with someone else's username by setting a custom username locally. 
+
+<Warning>
+Disabling `verify-names` allows anyone to join with any username, including those of operators and admins. Only disable it if you are running a private LAN server with no internet access.
+</Warning>
+
+## Admin verification
+
+Even with name verification enabled, MCGalaxy adds a second layer of protection for privileged accounts: admin verification.
+
+```ini
+admin-verification = true
+verify-admin-perm = Operator
+```
+
+Players at or above `verify-admin-perm` rank must run `/pass <password>` after joining before their rank privileges are activated. Until they verify, they are treated as guests. This prevents a compromised ClassiCube account from being used to abuse operator permissions on your server.
+
+**Setting or changing the verification password:**
+
+```
+/setpass <new password>
+```
+
+**Verifying after joining:**
+
+```
+/pass <password>
+```
+
+<Note>
+Passwords are stored hashed in `extra/passwords/` — never in plain text. If an operator forgets their password, an admin with `reset-password-perm` rank (default: Owner) can reset it with `/resetpass <name>`.
+</Note>
+
+## Whitelist mode
+
+When whitelist mode is active, only players explicitly added to the whitelist can join the server.
+
+```ini
+use-whitelist = true
+```
+
+**Managing the whitelist:**
+
+```
+/whitelist add <player>
+/whitelist remove <player>
+/whitelist list
+```
+
+<Warning>
+After enabling `use-whitelist`, make sure to add yourself to the whitelist before reloading the config, or you will be unable to rejoin.
+</Warning>
+
+## IP banning
+
+IP bans block a specific IP address from connecting, regardless of the username used. This is useful for dealing with players who create new accounts to evade username bans.
+
+```
+/banip <ip address>
+/unbanip <ip address>
+```
+
+Banned IPs are stored in `text/ipbans.txt`. You can edit this file directly if needed.
+
+<Note>
+If `allow-ip-forwarding = true` (the default for web client support), MCGalaxy uses the forwarded IP from the web client proxy rather than the raw TCP connection IP. This ensures IP bans work correctly for web client players.
+</Note>
+
+## Web client and IP forwarding
+
+```ini
+support-web-client = true
+allow-ip-forwarding = true
+```
+
+`support-web-client` allows connections from the ClassiCube browser client. `allow-ip-forwarding` reads the `X-Forwarded-For` header so that the player's real IP is visible to the server rather than the proxy's IP. Both should be enabled together or disabled together.
+
+<Warning>
+Only enable `allow-ip-forwarding` if your server is behind a trusted proxy (the ClassiCube web client relay). Enabling it on a server directly exposed to the internet lets any client forge its IP address.
+</Warning>
+
+## Staff IP protection
+
+```ini
+protect-staff-ips = true
+```
+
+When enabled, staff member IP addresses are hidden from the console log and from `/whois` output visible to lower-ranked players. This prevents non-staff players from learning staff members' IP addresses.
+
+## LAN IP verification
+
+```ini
+verify-lan-ips = false
+```
+
+By default, connections from LAN IP ranges (`192.168.x.x`, `10.x.x.x`, etc.) bypass name verification. Set this to `true` if you want name verification enforced for LAN players as well.
+
+## Connection rate limiting
+
+MCGalaxy includes a built-in connection throttler that limits how many times the same IP can connect within a short window. This mitigates brute-force join attempts and basic denial-of-service via rapid reconnects. The throttler operates automatically and requires no configuration.

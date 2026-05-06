@@ -1,0 +1,104 @@
+---
+title: "Creating and managing worlds in MCGalaxy"
+description: "Create new worlds with custom dimensions, load and unload maps, import external levels, and use MCGalaxy's built-in terrain generators."
+---
+
+MCGalaxy organizes gameplay around discrete **levels** (also called maps or worlds). Each level is a self-contained block grid with its own settings, physics, and permissions. Admins can generate new worlds at any time, load them on demand, and import maps created by other servers or editors.
+
+## Creating a new level
+
+```bash
+/newlvl [name] [width] [height] [length] [theme] <seed>
+```
+
+Generates and saves a new level. Dimensions must be between 1 and 16384 on each axis, subject to your rank's volume limit. The optional `seed` controls terrain generation — the same seed always produces the same result. The shortcut for `/newlvl` is `/gen`.
+
+<Note>
+  The volume your rank can generate is capped by the server's `GenVolume` group setting. Very large maps may take several seconds to generate.
+</Note>
+
+### Generator themes
+
+| Category | Themes |
+|---|---|
+| **Standard** | `flat`, `pixel`, `empty`, `space`, `rainbow` |
+| **fCraft** | `Archipelago`, `Atoll`, `Bay`, `Dunes`, `Hills`, `Ice`, `Island2`, `Lake`, `Mountains2`, `Peninsula`, `Random`, `River`, `Streams` |
+| **Advanced** | Noise-based generators (`Billow`, `Perlin`, `Voronoi`, etc.) and `Heightmap` — requires extra Admin permission |
+
+- `flat` — flat ground at half the map height; seed overrides the grass level
+- `pixel` — hollow white-wool box with a bedrock floor, ideal as a blank canvas
+- `empty` — only a bedrock floor at y=0; the rest is air
+- `space` — enclosed hollow box with obsidian/iron walls and a black sky
+- fCraft themes — Perlin-noise landscapes with beaches, cliffs, and optional trees
+
+Standard and fCraft themes also accept a **biome** name as part of the seed to change block palettes and environment colours (e.g. `desert`, `hell`, `arctic`, `swamp`).
+
+Run `/help newlvl themes` in-game for the full list. Run `/help newlvl [theme]` for seed details on any specific theme.
+
+## Loading and navigating levels
+
+```bash
+/load [name]     # Load a level into memory
+/unload [name]   # Unload a level from memory (saves first)
+/goto [name]     # Teleport to a level (auto-loads if LoadOnGoto is on)
+```
+
+`/goto` respects the level's `LoadOnGoto` map option. If that option is off, you must run `/load` first.
+
+## Copying, renaming, resizing, and deleting
+
+```bash
+/copylvl [source] [destination]               # Duplicate a level
+/renamelvl [old name] [new name]              # Rename a level
+/resizelvl [name] [width] [height] [length]   # Resize a level
+/deletelvl [name]                             # Permanently delete a level
+```
+
+<Warning>
+  `/deletelvl` removes the map file from disk permanently. Keep a backup before running it.
+</Warning>
+
+When shrinking with `/resizelvl`, blocks outside the new bounds are lost. MCGalaxy asks for confirmation:
+
+```bash
+/resizelvl myworld 64 32 64 confirm
+```
+
+## Importing external maps
+
+Place the file in the `extra/import/` folder on the server, then run:
+
+```bash
+/import [filename]
+```
+
+Supported formats include `.lvl`, `.cw`, `.fcm`, `.dat`, and `.mcf`. Run `/help import formats` in-game for the complete list.
+
+## Restoring backups
+
+MCGalaxy saves periodic numbered backups for each level automatically.
+
+```bash
+/restore                    # List all backups for the current level
+/restore [number]           # Restore a backup on the current level
+/restore [number] [level]   # Restore a backup on a specific level
+```
+
+Restoring overwrites the current level data and reloads the map for all players in it.
+
+## Create your first world
+
+<Steps>
+  <Step title="Generate the level">
+    Run `/newlvl myworld 128 64 128 flat` to create a 128×64×128 flat grassland named **myworld**.
+  </Step>
+  <Step title="Teleport to it">
+    Run `/goto myworld`. MCGalaxy loads the map automatically when `LoadOnGoto` is enabled.
+  </Step>
+  <Step title="Set visit and build permissions">
+    Run `/pervisit myworld guest` and `/perbuild myworld builder` to control access. See [Level settings](/worlds/level-settings) for all permission options.
+  </Step>
+  <Step title="Save a manual backup">
+    Run `/save` to create a named backup snapshot you can restore later with `/restore`.
+  </Step>
+</Steps>

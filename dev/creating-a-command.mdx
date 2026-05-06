@@ -1,0 +1,104 @@
+---
+title: "Creating custom commands for MCGalaxy"
+description: "Write custom slash commands in C# with the Command2 base class, covering permission levels, shortcuts, help text, aliases, and loading via plugin or DLL."
+---
+
+MCGalaxy's command system lets you add new `/commands` that players run in-game or that the server console executes without the slash. Every command is a C# class inheriting from `Command2`, compiled into a DLL and registered at runtime — either from a plugin or auto-loaded from the `extra/commands/dll/` directory.
+
+## The Command2 base class
+
+Use `Command2` (not `Command`) for all new commands. `Command2` routes the no-data `Use(Player, string)` overload to your `Use(Player, string, CommandData)` implementation automatically.
+
+**Required overrides:**
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `name` | `string` | The command name, e.g. `"Hello"` — players type `/hello` |
+| `type` | `string` | Category from `CommandTypes` constants |
+| `Use(Player p, string message, CommandData data)` | `void` | Command logic |
+| `Help(Player p)` | `void` | Called when a player runs `/help [command]` |
+
+**Optional overrides:**
+
+| Member | Default | Description |
+|--------|---------|-------------|
+| `shortcut` | `""` | Short alias, e.g. `"h"` for `/h` |
+| `defaultRank` | `Guest` | Minimum `LevelPermission` to use the command |
+| `museumUsable` | `true` | Set `false` if the command alters blocks |
+| `SuperUseable` | `true` | Set `false` to block console/IRC from using it |
+| `ExtraPerms` | `null` | Additional permission tiers for sub-actions |
+| `Aliases` | `null` | Extra aliases beyond `shortcut` |
+
+**CommandTypes constants:**
+
+```csharp
+CommandTypes.Building    // block-placing tools
+CommandTypes.Chat        // messaging
+CommandTypes.Fun         // games / entertainment
+CommandTypes.Information // read-only queries
+CommandTypes.Moderation  // admin actions
+CommandTypes.Other       // miscellaneous
+CommandTypes.World       // level management
+```
+
+## Full example: /hello command
+
+```csharp HelloCommand.cs
+using MCGalaxy;
+using MCGalaxy.Commands;
+
+public class CmdHello : Command2
+{
+    public override string name { get { return "Hello"; } }
+    public override string shortcut { get { return "hi"; } }
+    public override string type { get { return CommandTypes.Chat; } }
+    public override LevelPermission defaultRank { get { return LevelPermission.Guest; } }
+
+    public override void Use(Player p, string message, CommandData data)
+    {
+        if (message.Length == 0) {
+            p.Message("Hello, " + p.DisplayName + "!");
+        } else {
+            p.Message("Hello, " + message + "!");
+        }
+    }
+
+    public override void Help(Player p)
+    {
+        p.Message("/Hello [name] - Greets you or the given name.");
+    }
+}
+```
+
+## Deploying your command
+
+<Tabs>
+  <Tab title="From a plugin">
+    Register the command inside your plugin's `Load` method:
+
+    ```csharp
+    public override void Load(bool auto)
+    {
+        Command.Register(new CmdHello());
+    }
+
+    public override void Unload(bool auto)
+    {
+        Command.Unregister(Command.Find("Hello"));
+    }
+    ```
+  </Tab>
+  <Tab title="Standalone DLL">
+    Compile to `extra/commands/dll/CmdHello.dll`. MCGalaxy auto-loads all DLLs in that directory on startup via `IScripting.AutoloadCommands()`. The DLL filename must start with `Cmd`.
+
+    You can also load/unload manually:
+    ```bash
+    /CmdLoad Hello
+    /CmdUnload Hello
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+When using `Command.TryRegister`, MCGalaxy skips registration silently if a command with the same name already exists — useful for plugins that register optional commands.
+</Note>

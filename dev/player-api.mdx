@@ -1,0 +1,102 @@
+---
+title: "Player API reference for MCGalaxy plugins"
+description: "Key Player class members for plugin developers: sending messages, reading identity and rank, accessing position, and managing player state."
+---
+
+The `Player` class is the central object representing a connected player. In event handlers and command implementations, you receive a `Player` instance and can read its state or call methods to interact with the player. This page covers the members most commonly used in plugin development.
+
+## Identity
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `p.name` | `string` | Account name — use for data storage (key in database) |
+| `p.truename` | `string` | Display/logging name (same as `name` unless ClassiCubeAccountPlus is on) |
+| `p.DisplayName` | `string` | Name shown in chat (may differ if nick is set) |
+| `p.ColoredName` | `string` | Display name with rank color prefix |
+| `p.IP` | `IPAddress` | Player's IP address |
+| `p.ip` | `string` | Player's IP as string |
+| `p.IsSuper` | `bool` | `true` for Console, IRC, Discord — not a real connected player |
+| `p.IsConsole` | `bool` | `true` only for the server console instance |
+
+## Rank and permissions
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `p.group` | `Group` | The player's current rank/group |
+| `p.Rank` | `LevelPermission` | Shorthand for `p.group.Permission` |
+| `p.AllowBuild` | `bool` | Whether the player can currently build in the level |
+| `p.hidden` | `bool` | Whether the player is hidden from others |
+| `p.DefaultCmdData` | `CommandData` | `CommandData` struct pre-filled with the player's rank |
+
+## Position and world
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `p.level` | `Level` | The level/world the player is currently in |
+| `p.Pos` | `Position` | Player's current position (in fixed-point units; divide by 32 for block coords) |
+
+## State flags
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `p.muted` | `bool` | Player is muted |
+| `p.frozen` | `bool` | Player is frozen |
+| `p.jailed` | `bool` | Player is jailed |
+| `p.painting` | `bool` | Player is in paint mode |
+| `p.IsAfk` | `bool` | Player is AFK |
+| `p.money` | `int` | Current economy balance |
+
+## Sending messages
+
+```csharp
+// Send a colored message to the player
+p.Message("&aYou have joined the game!");
+
+// Use format arguments (works like string.Format)
+p.Message("You are on level: {0}", p.level.name);
+```
+
+`p.Message()` supports MCGalaxy's color codes: `&a` green, `&c` red, `&e` yellow, `&f` white, etc.
+
+## Sending fake block updates
+
+You can send a block change that only the player sees (a "phantom" block):
+
+```csharp
+// Send a fake gold block at position (10, 64, 10) to this player only
+p.SendBlockchange(10, 64, 10, Block.Gold);
+```
+
+This does not modify the actual level data — other players won't see it.
+
+## Example: greeting a player on join
+
+```csharp
+using MCGalaxy;
+using MCGalaxy.Events.PlayerEvents;
+
+public class GreeterPlugin : Plugin
+{
+    public override string name { get { return "Greeter"; } }
+
+    public override void Load(bool auto)
+    {
+        OnPlayerConnectEvent.Register(OnConnect, Priority.Normal);
+    }
+
+    public override void Unload(bool auto)
+    {
+        OnPlayerConnectEvent.Unregister(OnConnect);
+    }
+
+    void OnConnect(Player p)
+    {
+        if (p.IsSuper) return; // skip console/IRC
+        p.Message("&eWelcome, " + p.DisplayName + "! You are ranked: " + p.group.ColoredName);
+    }
+}
+```
+
+<Note>
+Always check `p.IsSuper` before sending messages or accessing level-specific data — console and IRC players do not have a level or position.
+</Note>

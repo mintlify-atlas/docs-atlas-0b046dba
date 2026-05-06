@@ -1,0 +1,275 @@
+---
+title: "MCGalaxy command reference overview"
+description: "Browse MCGalaxy's built-in commands by category: building, chat, moderation, world management, economy, information, and scripting."
+---
+
+MCGalaxy ships with a large set of built-in commands covering everything from block drawing tools to economy transactions. In-game, commands are entered with a `/` prefix (e.g. `/help`). From the server console or IRC, omit the `/` prefix and type the command name directly (e.g. `help`). Most commands have shortcuts — single letters or short strings that trigger the full command.
+
+To get detailed help on any command, use:
+
+```
+/help [command]
+```
+
+To list all commands available to your rank:
+
+```
+/commands
+```
+
+<CardGroup cols={2}>
+  <Card title="Building" icon="hammer" href="/administration/commands-overview#building-commands">
+    Draw tools, copy/paste, brushes, and world-editing operations.
+  </Card>
+  <Card title="Chat" icon="message-circle" href="/administration/commands-overview#chat-commands">
+    Private messages, operator chat, titles, nicknames, and emotes.
+  </Card>
+  <Card title="Moderation" icon="shield" href="/administration/commands-overview#moderation-commands">
+    Ban, kick, mute, freeze, warn, whitelist, and block undo tools.
+  </Card>
+  <Card title="World" icon="map" href="/administration/commands-overview#world-commands">
+    Level creation, navigation, physics, map settings, and saves.
+  </Card>
+  <Card title="Information" icon="info" href="/administration/commands-overview#information-commands">
+    Player and server info, map details, rank lists, and stats.
+  </Card>
+  <Card title="Other" icon="package" href="/administration/commands-overview#other-commands">
+    Teleportation, economy, awards, bots, scripting, and fun commands.
+  </Card>
+</CardGroup>
+
+---
+
+## Building commands
+
+Building commands let players draw and modify blocks in the world. Most require the player to mark positions by placing or breaking blocks.
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `/Copy` | | Copies a selected region to the clipboard. |
+| `/Paste` | | Pastes the clipboard contents at the current position. |
+| `/Cuboid` | `z` | Fills a rectangular region with a block. |
+| `/Sphere` | | Draws a filled sphere. |
+| `/Spheroid` | | Draws a filled spheroid (ellipsoid). |
+| `/Replace` | `r` | Replaces all instances of one block with another in a region. |
+| `/ReplaceNot` | `rn` | Replaces everything except a specified block in a region. |
+| `/Undo` | `u` | Undoes your own recent block changes. |
+| `/Redo` | | Re-applies changes that were undone. |
+| `/Draw` | `d` | Draws lines, curves, and other geometric shapes. |
+| `/Fill` | | Flood-fills an enclosed area. |
+| `/Hollow` | | Makes the interior of a solid shape empty. |
+| `/Outline` | | Draws the outer shell of a region with a different block. |
+| `/Line` | | Draws a line between two points. |
+| `/Torus` | | Draws a torus (donut shape). |
+| `/Pyramid` | | Draws a pyramid. |
+| `/Tree` | | Generates a tree structure. |
+| `/Maze` | | Generates a random maze. |
+| `/Mirror` | | Mirrors a selected region. |
+| `/Spin` | | Rotates a copied region. |
+| `/Transform` | | Applies matrix transformations to a region. |
+| `/Brush` | `b` | Sets the brush used by drawing commands. |
+| `/Mark` | `m` | Marks a position as a selection point. |
+| `/Abort` | `a` | Cancels the current drawing operation. |
+| `/Undo` | `u` | Reverts your recent block placements. |
+| `/WriteText` | | Writes text using blocks. |
+| `/ImagePrint` | | Renders an image as blocks. |
+| `/MessageBlock` | `mb` | Places a block that sends a message when activated. |
+| `/Portal` | | Creates a portal block that teleports players. |
+| `/Measure` | | Reports the dimensions of a selected region. |
+| `/Mode` | | Toggles a block placement mode (e.g. paint mode). |
+| `/Paint` | | Enables paint mode (replace instead of place). |
+
+<Tip>
+Most building commands require you to select a region by placing or breaking two blocks. Use `/Mark` to mark a position without placing a block, and `/Abort` to cancel any active operation.
+</Tip>
+
+---
+
+## Chat commands
+
+Chat commands control how messages appear and who receives them.
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `/Say` | | Broadcasts a message to all players as the server. |
+| `/Whisper` | `w` or `tell` | Sends a private message to a player. |
+| `/AdminChat` | `ac` | Sends a message visible only to admins. |
+| `/OpChat` | `opc` | Sends a message visible only to operators and above. |
+| `/Nick` | | Sets a display nickname for a player. |
+| `/Title` | | Sets a title that appears before a player's name. |
+| `/TColor` | | Sets the color of a player's title. |
+| `/Color` | | Sets a player's name color. |
+| `/Me` | | Sends an action message (e.g. `* Name waves`). |
+| `/Emote` | | Sends an emote. |
+| `/Afk` | | Marks yourself as AFK. |
+| `/Ignore` | | Ignores or unignores a player's messages. |
+| `/Nick` | | Changes the displayed name for a player. |
+| `/RankMsg` | | Sets a message broadcast when your rank changes. |
+| `/LoginMessage` | | Sets a custom message shown when you join. |
+| `/LogoutMessage` | | Sets a custom message shown when you leave. |
+| `/Inbox` | | Reads messages sent to you while offline. |
+| `/Send` | | Sends a message to a player's inbox. |
+| `/8Ball` | | Asks the magic 8-ball a question. |
+| `/Roll` | | Rolls dice. |
+| `/High5` | | High-fives another player. |
+| `/Vote` | | Starts or votes in a poll. |
+
+---
+
+## Moderation commands
+
+Moderation commands are used to manage player behaviour. See [Moderating players](/administration/moderation) for full usage details and step-by-step workflows.
+
+| Command | Shortcut | Default rank | Description |
+|---------|----------|-------------|-------------|
+| `/Ban` | `KickBan`, `kb` | Operator | Bans a player and kicks them if online. |
+| `/Unban` | | Operator | Removes a player's ban. |
+| `/BanIP` | `bi`, `IPBan` | Operator | Bans an IP address or the IP of a named player. |
+| `/UnbanIP` | | Operator | Removes an IP ban. |
+| `/XBan` | `BanX` | Operator | Bans, IP-bans, and undoes a player in one step. |
+| `/TempBan` | `tb` | AdvBuilder | Bans a player for a specified duration. |
+| `/Kick` | `k` | AdvBuilder | Disconnects a player from the server. |
+| `/Mute` | | Operator | Prevents a player from chatting. |
+| `/Unmute` | | Operator | Removes a mute. |
+| `/Freeze` | `fz` | Operator | Prevents a player from moving. |
+| `/Warn` | | AdvBuilder | Warns a player; three warnings result in a kick. |
+| `/SetRank` | `Rank` | Operator | Changes a player's rank. |
+| `/UndoPlayer` | `up` | Operator | Reverts a player's block changes. |
+| `/BlockDB` | | Operator | Queries the block change database. |
+| `/Whitelist` | `w` | Operator | Manages the server whitelist. |
+| `/Report` | | Guest | Reports a player to staff. |
+| `/Patrol` | | AdvBuilder | Teleports to a random unpatrolled player. |
+| `/Highlight` | | Operator | Highlights a player's recent block changes. |
+| `/Follow` | | Operator | Silently follows a player. |
+| `/Joker` | | Operator | Makes a player's chat messages appear as random nonsense. |
+| `/Voice` | | Operator | Allows a player to chat during moderated mode. |
+| `/Moderate` | | Operator | Enables moderated chat mode (only voiced players can chat). |
+| `/Trust` | | Operator | Trusts a player in the current level. |
+| `/Zone` | | Operator | Creates a build-permission zone within a level. |
+| `/CmdSet` | | Operator | Changes the minimum rank required to use a command. |
+| `/BlockSet` | | Operator | Changes which ranks can place or delete a block. |
+
+---
+
+## World commands
+
+World commands manage levels: creating, loading, navigating between them, and configuring their properties.
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `/Goto` | `g` | Teleports to a different level. |
+| `/Main` | | Returns to the server's main level. |
+| `/NewLvl` | `newlevel` | Creates a new level. |
+| `/Load` | | Loads a level from disk. |
+| `/Unload` | | Unloads a level from memory. |
+| `/Save` | | Saves the current level to disk. |
+| `/Map` | | Views or modifies settings for the current level. |
+| `/Physics` | | Sets the physics simulation speed for the current level. |
+| `/Spawn` | | Returns to the level spawn point. |
+| `/SetSpawn` | | Sets the spawn point of the current level. |
+| `/Reload` | | Reloads the current level for all players on it. |
+| `/CopyLvl` | | Copies a level to a new name. |
+| `/RenameLvl` | | Renames a level. |
+| `/DeleteLvl` | | Deletes a level permanently. |
+| `/ResizeLvl` | | Resizes a level's dimensions. |
+| `/Restore` | | Restores a level from a backup. |
+| `/Museum` | | Opens a level in read-only museum mode. |
+| `/Overseer` | `os` | Manages your personal Overseer realm maps. |
+| `/PermissionBuild` | | Sets the minimum rank required to build on the current level. |
+| `/PermissionVisit` | | Sets the minimum rank required to visit the current level. |
+| `/Lockdown` | | Prevents new players from entering the current level. |
+| `/Pause` | | Pauses physics on the current level. |
+| `/Import` | | Imports a level from an external file. |
+| `/Levels` | | Lists all loaded levels. |
+| `/BlockProperties` | | Views or edits properties of a block type on the level. |
+| `/FixGrass` | | Fixes grass blocks that should be dirt (or vice versa). |
+
+---
+
+## Information commands
+
+Information commands let players and staff look up details about players, levels, and the server itself.
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `/Players` | | Lists all currently online players. |
+| `/Where` | | Shows a player's current location and level. |
+| `/Whois` | | Shows detailed info about a player (rank, IP, login time, etc.). |
+| `/WhoNick` | | Looks up a player by their display nickname. |
+| `/MapInfo` | `mi` | Shows details about the current or named level. |
+| `/ServerInfo` | `si` | Displays server configuration and uptime information. |
+| `/RankInfo` | | Shows configuration details for a rank. |
+| `/ViewRanks` | | Lists all configured ranks and their permission levels. |
+| `/BanInfo` | | Shows ban details for a player. |
+| `/Seen` | | Shows when a player was last online. |
+| `/Loaded` | | Lists all currently loaded levels. |
+| `/Top` | | Shows a leaderboard (e.g. most blocks placed). |
+| `/OpStats` | | Shows moderation statistics. |
+| `/About` | | Shows information about the block you are looking at. |
+| `/Blocks` | | Lists all available block types. |
+| `/Commands` | | Lists all commands available to your rank. |
+| `/Help` | | Shows usage help for a command. |
+| `/Rules` | | Displays the server rules. |
+| `/OpRules` | | Displays operator-specific rules. |
+| `/News` | | Displays the server news file. |
+| `/Search` | | Searches commands, levels, and players by name. |
+| `/Clones` | | Lists accounts sharing the same IP as a player. |
+| `/Time` | | Shows the current server time. |
+| `/LastCmd` | | Shows the last command a player used. |
+
+---
+
+## Other commands
+
+<Tabs>
+  <Tab title="Teleportation">
+    | Command | Shortcut | Description |
+    |---------|----------|-------------|
+    | `/Tp` | | Teleports to a player or coordinates. |
+    | `/TpA` | | Requests permission to teleport to a player. |
+    | `/Summon` | | Teleports a player to you. |
+    | `/Back` | | Returns to your previous position. |
+    | `/Ascend` | | Moves you up to the nearest open space above. |
+    | `/Descend` | | Moves you down to the nearest open space below. |
+    | `/Fly` | | Toggles flight mode (requires client support). |
+    | `/Spawn` | | Returns to the level spawn. |
+    | `/Ride` | | Lets you ride another player's model. |
+  </Tab>
+  <Tab title="Economy">
+    | Command | Shortcut | Description |
+    |---------|----------|-------------|
+    | `/Balance` | `money` | Shows your current currency balance. |
+    | `/Pay` | | Transfers currency to another player. |
+    | `/Give` | | Gives currency to a player (staff). |
+    | `/Take` | | Removes currency from a player (staff). |
+    | `/Store` | `shop` | Lists items available to purchase. |
+    | `/Buy` | | Purchases a store item. |
+    | `/Economy` | `eco` | Configures economy items (staff). |
+  </Tab>
+  <Tab title="Awards">
+    | Command | Description |
+    |---------|-------------|
+    | `/Award` | Gives or removes an award from a player. |
+    | `/Awards` | Lists all available awards and which you have. |
+    | `/AwardMod` | Creates, deletes, or modifies award definitions. |
+  </Tab>
+  <Tab title="Scripting and bots">
+    | Command | Description |
+    |---------|-------------|
+    | `/CmdLoad` | Loads a custom command plugin from a DLL. |
+    | `/CmdUnload` | Unloads a custom command plugin. |
+    | `/Plugin` | Lists loaded plugins. |
+    | `/Bot` | Creates or manages bots. |
+    | `/BotSet` | Assigns an AI to a bot. |
+    | `/BotAI` | Lists available bot AI types. |
+    | `/SendCmd` | Executes a command as another player (Owner only). |
+  </Tab>
+</Tabs>
+
+---
+
+## Command shortcuts
+
+Many commands have one or more shortcut aliases. For example, `/Kick` has shortcut `k`, so `/k PlayerName` works identically to `/Kick PlayerName`. Aliases can also pass preset arguments — for example, `/Promote` is an alias for `/SetRank +up`.
+
+Use `/Help [command]` to see both the full syntax and any defined aliases for a given command.

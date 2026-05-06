@@ -1,0 +1,119 @@
+---
+title: "Built-in mini-games in MCGalaxy"
+description: "MCGalaxy ships with five built-in mini-games: Zombie Survival, CTF, Lava Survival, TNT Wars, and Countdown — no plugins required."
+---
+
+MCGalaxy includes five mini-games as built-in modules. Each game runs on its own dedicated level and is managed by operator-level commands. No external plugins are needed; the games load automatically with the server and can be started or stopped at any time.
+
+<CardGroup cols={2}>
+  <Card title="Zombie Survival" icon="skull">
+    Players versus zombies — survive until the round ends or infect everyone.
+  </Card>
+  <Card title="Capture the Flag" icon="flag">
+    Two teams compete to steal the opposing team's flag and return it to base.
+  </Card>
+  <Card title="Lava Survival" icon="fire">
+    Avoid rising lava as long as possible, using a configurable safe zone.
+  </Card>
+  <Card title="TNT Wars" icon="bomb">
+    Place TNT to eliminate opponents in team deathmatch or free-for-all mode.
+  </Card>
+  <Card title="Countdown" icon="timer">
+    Race to survive as floor tiles are removed beneath players' feet.
+  </Card>
+</CardGroup>
+
+## Zombie Survival
+
+Players start as humans and must survive rounds against infected zombies. When a zombie touches a human, that player becomes infected and joins the zombie team. The round ends when all humans are infected or the round timer expires. Operators can tune hitbox distance, maximum movement speed, pillaring rules, and build permissions per map.
+
+| Command | Description |
+|---|---|
+| `/ZS start <map>` | Start Zombie Survival, optionally on a specific map |
+| `/ZS stop` | Stop Zombie Survival |
+| `/ZS end` | End the current round immediately |
+| `/ZS add` / `/ZS remove` | Add or remove the current map from the rotation |
+| `/ZS set hitbox <distance>` | Max distance between players before they are considered touching |
+| `/ZS set maxmove <distance>` | Max movement per tick before a player is flagged as speed-hacking |
+| `/ZS set pillaring [yes/no]` | Allow or disallow pillaring on the current map |
+| `/ZS set build [normal/modifyonly/nomodify]` | Set build type for the current map |
+| `/ZS set roundtime <timespan>` | Set how long a round lasts |
+| `/ZS status` | Show current game status |
+| `/ZS go` | Teleport to the current Zombie Survival map |
+
+Aliases: `/ZG`, `/RoundTime` (shortcut for `/ZS set roundtime`).
+
+## Capture the Flag
+
+Two teams — red and blue — compete to grab the opposing team's flag block and carry it back to their own base. A Z-axis divider separates the two halves of the map. Per-map setup requires placing spawn points and flag blocks with `/CTF set`.
+
+| Command | Description |
+|---|---|
+| `/CTF start <map>` | Start a CTF game |
+| `/CTF stop` | Stop CTF |
+| `/CTF end` | End the current round |
+| `/CTF add` / `/CTF remove` | Add or remove the current map from the rotation |
+| `/CTF set redspawn` / `bluespawn` | Set spawn for red or blue team at your current position |
+| `/CTF set redflag` / `blueflag` | Set flag position and block via block placement |
+| `/CTF set divider` | Set the Z-axis divider at your current Z position |
+| `/CTF status` | View current team scores |
+| `/CTF go` | Teleport to the current CTF map |
+
+## Lava Survival
+
+Lava (or optionally water) floods the map from a configurable spawn point. Players must reach the designated safe zone before the flood arrives. Flood behaviour — speed, upward chance, layer mode, and timing — can all be tuned per map.
+
+| Command | Description |
+|---|---|
+| `/LS start <map>` | Start Lava Survival |
+| `/LS stop` | Stop Lava Survival |
+| `/LS end` | End the current round |
+| `/LS add` / `/LS remove` | Add or remove the current map |
+| `/LS set spawn flood` | Set the position from which lava floods |
+| `/LS set spawn safe` | Define the safe zone by selecting two corner blocks |
+| `/LS set block fast <chance>` | Chance (0–100) of fast lava |
+| `/LS set block water <chance>` | Chance of a water flood instead of lava |
+| `/LS set block upwards <chance>` | Chance of upward flooding |
+| `/LS set other round <time>` | Set round duration |
+| `/LS set other flood <time>` | Set how long until the map floods |
+| `/LS set layer …` | Configure layer-based flooding (height, count, chance, interval) |
+| `/LS status` | View current round info and time |
+| `/LS go` | Teleport to the current Lava Survival map |
+
+## TNT Wars
+
+Players place TNT to eliminate opponents. Supports Team Deathmatch (TDM) and Free-For-All (FFA) modes with four difficulty levels: easy, normal, hard, and extreme. Configurable scoring (kills, assists, streaks, multikill bonuses), team balancing, grace periods, and zone types give operators fine-grained control. Zones can be designated as no-TNT areas or explosion-immune areas where blocks are not destroyed.
+
+| Command | Description |
+|---|---|
+| `/TW start <map>` | Start TNT Wars |
+| `/TW stop` | Stop TNT Wars |
+| `/TW end` | End the current round |
+| `/TW add` / `/TW remove` | Add or remove the current map |
+| `/TW set gamemode [tdm/ffa]` | Switch between team deathmatch and free-for-all |
+| `/TW set difficulty [easy/normal/hard/extreme]` | Set explosion difficulty |
+| `/TW set tnt <amount>` | Max TNT a player can have active at once (0 = unlimited) |
+| `/TW set graceperiod [on/off]` | Enable or disable the grace period at round start |
+| `/TW set score required <pts>` | Points needed to win the round |
+| `/TW set score kill <pts>` | Points awarded per kill |
+| `/TW set zone notnt/nodestroy add` | Create a no-TNT or explosion-immune zone |
+| `/TW scores` | List players with the highest scores |
+| `/TW status` | View your current score and health |
+| `/TW go` | Teleport to the current TNT Wars map |
+
+## Countdown
+
+The map is a grid of floor tiles. Once the round starts, tiles are progressively removed. Players who fall off are eliminated; the last player standing wins. A `freeze` mode variant holds players in place until the round begins. Map dimensions can be regenerated at any time without stopping the server.
+
+| Command | Description |
+|---|---|
+| `/CD start <speed> <mode>` | Start Countdown; speed: `slow`, `normal`, `fast`, `extreme`, `ultimate`; mode: `normal` or `freeze` |
+| `/CD stop` | Stop Countdown |
+| `/CD end` | End the current round |
+| `/CD join` | Join the game before a round starts |
+| `/CD set <width> <height> <length>` | Regenerate the countdown map at the given dimensions (default 32×32×32) |
+| `/CD status` | List players currently in the game |
+
+<Note>
+All five games run on specific levels and require those levels to be configured before starting. Use the `add`/`remove` subcommand on each game to build a map rotation. The game cycles through the rotation automatically between rounds.
+</Note>

@@ -1,0 +1,253 @@
+---
+title: "Economy system: currency and shop in MCGalaxy"
+description: "Set up MCGalaxy's built-in economy with server currency, configure shop items for rank upgrades, titles, personal maps, and custom login messages."
+---
+
+MCGalaxy includes a built-in economy system that lets players earn and spend a server currency (referred to as "moneys" by default, though the name is configurable via the `Currency` setting in `server.properties`). When enabled, players can check their balance, transfer currency to each other, and spend it in the `/store` on purchasable items such as rank upgrades, cosmetic titles, personal maps, and custom login/logout messages.
+
+The economy is disabled by default. All configuration is stored in `economy.properties`.
+
+---
+
+## Enabling the economy
+
+To enable the economy, set `enabled:true` in `economy.properties`, or use the `/Economy` command in-game:
+
+```
+/Economy enable
+```
+
+To disable it:
+
+```
+/Economy disable
+```
+
+When disabled, commands like `/Buy`, `/Store`, and `/Balance` display a message that the economy is currently inactive.
+
+---
+
+## Currency commands
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `/Balance` | `money` | Shows your current currency balance. |
+| `/Pay [player] [amount]` | | Transfers currency from your balance to another player. |
+| `/Give [player] [amount]` | | Gives currency to a player (staff). Does not deduct from your balance. |
+| `/Take [player] [amount]` | | Removes currency from a player (staff). |
+| `/Store` | `shop` | Lists all enabled shop items and their prices. |
+| `/Buy [item] <args>` | | Purchases an item from the store. |
+| `/Economy` | `eco` | Configures economy items and settings (staff). |
+
+<Note>
+The name of the currency is set by `Currency` in `server.properties` (defaults to `moneys`). This name appears in all economy-related messages.
+</Note>
+
+---
+
+## Shop items
+
+Each purchasable item has an enabled/disabled state and a minimum purchase rank (`PurchaseRank`). Staff configure items using `/Economy [item] [option] [value]`. The following item types are built in.
+
+### Rank upgrades (RankItem)
+
+Lets players buy their way to the next rank in sequence. Players can only purchase one rank at a time, moving up in order.
+
+```
+/Buy rankup
+```
+
+Configure prices with `/Economy`:
+
+```
+/Economy rank price [rankname] [amount]
+/Economy rank remove [rankname]
+```
+
+For example, to make the Builder rank cost 500 tokens:
+
+```
+/Economy rank price Builder 500
+```
+
+The store overview shows the player's next purchasable rank and its price.
+
+<Note>
+Players can only buy ranks up to — and not including — the highest configured rank. Rank purchases are not reversible through the economy; use `/SetRank` to manually adjust.
+</Note>
+
+### Titles (TitleItem)
+
+Players can set a custom title that appears before their name in chat. Removing the title (by buying with an empty title) is free.
+
+```
+/Buy title [text]
+/Buy title              # removes the current title for free
+```
+
+Configure the price:
+
+```
+/Economy title price [amount]
+```
+
+### Title color (TitleColorItem)
+
+Players can set the color of their title text separately from the title itself.
+
+```
+/Buy titlecolor [colorname]
+```
+
+Configure the price:
+
+```
+/Economy titlecolor price [amount]
+```
+
+### Name color (ColorItem)
+
+Players can change the color of their in-game display name.
+
+```
+/Buy color [colorname]
+```
+
+Configure the price:
+
+```
+/Economy color price [amount]
+```
+
+### Nickname (NickItem)
+
+Players can set a custom display nickname (up to 29 characters). Removing the nickname is free.
+
+```
+/Buy nickname [name]
+/Buy nickname           # removes the nickname for free
+```
+
+Configure the price:
+
+```
+/Economy nickname price [amount]
+```
+
+### Personal maps (LevelItem)
+
+Admins can define level presets that players can purchase. Each preset has a name, dimensions, generator theme, and price. On purchase, a new level named `[playername]_[name]` is created with realm permissions set for the buyer.
+
+```
+/Buy level [presetname] <customname>
+```
+
+Configure presets:
+
+```
+/Economy level add [name] [x] [y] [z] [theme] [price]
+/Economy level remove [name]
+/Economy level edit [name] [property] [value]
+```
+
+Example — add a small flat map preset costing 1,000 tokens:
+
+```
+/Economy level add small 64 32 64 flat 1000
+```
+
+Players browse available presets with `/Store maps`.
+
+### Login and logout messages (LoginMessageItem / LogoutMessageItem)
+
+Players can set a custom message shown to all players when they join or leave the server. Messages must be 64 characters or fewer. Clearing the message is free.
+
+```
+/Buy loginmessage [text]
+/Buy loginmessage        # removes the message for free
+
+/Buy logoutmessage [text]
+/Buy logoutmessage       # removes the message for free
+```
+
+Configure prices:
+
+```
+/Economy loginmessage price [amount]
+/Economy logoutmessage price [amount]
+```
+
+---
+
+## Configuring the store
+
+Use `/Economy` to manage each item type. Every item type supports the following base options:
+
+```
+/Economy [item] enable
+/Economy [item] disable
+/Economy [item] purchaserank [rank]
+```
+
+`purchaserank` sets the lowest rank that can purchase the item. For example, to restrict rank upgrades to Builders only:
+
+```
+/Economy rank purchaserank Builder
+```
+
+To see a summary of all enabled items and their current prices, run:
+
+```
+/Store
+```
+
+For detailed information about a specific item:
+
+```
+/Store [item]
+```
+
+---
+
+## economy.properties format
+
+The file uses a colon-separated format. Each item's settings are grouped under its name. A minimal example:
+
+```
+enabled:true
+
+Title:enabled:true
+Title:purchaserank:30
+Title:price:100
+
+Rank:enabled:true
+Rank:purchaserank:0
+Rank:price:30:500
+Rank:price:50:1500
+
+Level:enabled:true
+Level:purchaserank:30
+Level:levels:small:price:1000
+Level:levels:small:x:64
+Level:levels:small:y:32
+Level:levels:small:z:64
+Level:levels:small:type:flat
+```
+
+Item names used in the file match the `Name` property of each item class: `Title`, `TitleColor`, `Color`, `Nickname`, `Rank`, `Level`, `LoginMessage`, `LogoutMessage`.
+
+---
+
+## Awards system
+
+Awards are separate from the economy but follow a similar administrative pattern. Awards are badges granted to players by staff to recognise achievements or contributions.
+
+| Command | Description |
+|---------|-------------|
+| `/Award [player] [award]` | Gives or removes an award from a player. |
+| `/Awards` | Lists all available awards and shows which ones you hold. |
+| `/AwardMod add [name] [description]` | Creates a new award. |
+| `/AwardMod delete [name]` | Deletes an award. |
+| `/AwardMod rename [old] [new]` | Renames an award. |
+
+Award definitions are stored separately from economy settings, and `/Awards` is available to all players regardless of whether the economy is enabled.

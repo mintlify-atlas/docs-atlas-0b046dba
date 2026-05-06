@@ -1,0 +1,116 @@
+---
+title: "Compiling MCGalaxy from source"
+description: "Build MCGalaxy from source on Windows, macOS, or Linux using Visual Studio, MSBuild, or the dotnet CLI targeting .NET Framework, Mono, or .NET 6/7/8."
+---
+
+MCGalaxy is written in C# and can be compiled on Windows, macOS, and Linux using the .NET Framework, Mono, or modern .NET (6, 7, or 8). The solution file `MCGalaxy.sln` targets .NET Framework 4.0 and covers both the GUI and CLI executables. Separate project files in the `CLI/` directory target .NET 6, 7, and 8 for the CLI-only build.
+
+## Prerequisites
+
+Choose one of the following runtimes depending on your platform and preference:
+
+- **.NET Framework 4.0 SDK** — Windows only; included with Visual Studio 2019/2022.
+- **Mono** — cross-platform; install via your package manager or [mono-project.com](https://www.mono-project.com).
+  - Ubuntu/Debian: `apt install mono-complete`
+  - macOS: download from the Mono website
+- **.NET 6, 7, or 8 SDK** — cross-platform; download from [dot.net](https://dotnet.microsoft.com/download). Only the CLI binary (`MCGalaxyCLI.exe`) is produced; the GUI binary requires .NET Framework or Mono.
+
+## Build outputs
+
+| Binary | Description |
+|---|---|
+| `MCGalaxy.exe` | Full GUI server (Windows-native GUI; runs headless on Mono/Linux) |
+| `MCGalaxyCLI.exe` | Command-line only server; works on all platforms |
+
+---
+
+<Tabs>
+  <Tab title="IDE">
+    ## Building with Visual Studio or SharpDevelop
+
+    <Steps>
+      <Step title="Open the solution">
+        Open `MCGalaxy.sln` in Visual Studio (2019 or later recommended) or SharpDevelop.
+      </Step>
+      <Step title="Build">
+        - **Visual Studio**: click `Build` in the menu bar, then `Build Solution`, or press **F6**.
+        - **SharpDevelop**: click `Build` in the menu bar, then `Build Solution`, or press **F8**.
+      </Step>
+      <Step title="Run">
+        The compiled binaries appear in `MCGalaxy/bin/Release/` (or `Debug/`). Run `MCGalaxy.exe` for the GUI or `MCGalaxyCLI.exe` for the CLI.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="MSBuild / xbuild">
+    ## Building on the command line (.NET Framework / Mono)
+
+    <Steps>
+      <Step title="Open the correct prompt">
+        - **Windows**: Open the **MSBuild command prompt for VS** (found in the Visual Studio start menu folder).
+        - **Modern Mono (macOS/Linux)**: Open any terminal.
+        - **Older Mono**: Open any terminal.
+      </Step>
+      <Step title="Run the build">
+        <CodeGroup>
+          ```bash Windows (MSBuild)
+          msbuild MCGalaxy.sln
+          ```
+
+          ```bash Modern Mono
+          msbuild MCGalaxy.sln
+          ```
+
+          ```bash Older Mono
+          xbuild MCGalaxy.sln
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Run">
+        Binaries are placed in `MCGalaxy/bin/Release/`. Start the server with:
+
+        ```bash
+        mono MCGalaxy.exe      # GUI (runs headless on Linux/macOS)
+        mono MCGalaxyCLI.exe   # CLI
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="dotnet CLI">
+    ## Building with the .NET 6 / 7 / 8 SDK
+
+    The `CLI/` directory contains separate project files for each modern .NET version. These produce the `MCGalaxyCLI` binary only.
+
+    <Steps>
+      <Step title="Navigate to the CLI directory">
+        ```bash
+        cd CLI
+        ```
+      </Step>
+      <Step title="Build for your chosen runtime">
+        <CodeGroup>
+          ```bash .NET 6
+          dotnet build MCGalaxyCLI_dotnet6.csproj
+          ```
+
+          ```bash .NET 7
+          dotnet build MCGalaxyCLI_dotnet7.csproj
+          ```
+
+          ```bash .NET 8
+          dotnet build MCGalaxyCLI_dotnet8.csproj
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Run">
+        ```bash
+        dotnet run --project MCGalaxyCLI_dotnet8.csproj
+        ```
+        Or run the compiled binary directly from the `bin/` output directory.
+      </Step>
+    </Steps>
+
+    <Note>
+    The .NET 6/7/8 builds produce the CLI binary only (`MCGalaxyCLI`). The GUI executable (`MCGalaxy.exe`) requires .NET Framework or Mono.
+    </Note>
+  </Tab>
+</Tabs>

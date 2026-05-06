@@ -1,0 +1,120 @@
+{
+  "projectType": "framework",
+  "projectName": "MCGalaxy",
+  "projectDescription": "A fully featured and customisable ClassiCube/Minecraft Classic server software with a plugin system, rank-based permissions, world management, and built-in mini-games.",
+  "theme": "maple",
+  "primaryColor": "#cbcbcb",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "joining-your-server"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "administration/ranks-permissions",
+              "administration/commands-overview",
+              "administration/moderation",
+              "administration/economy"
+            ]
+          },
+          {
+            "group": "World Management",
+            "pages": [
+              "worlds/creating-levels",
+              "worlds/level-settings",
+              "worlds/building-tools",
+              "worlds/overseer-realms"
+            ]
+          },
+          {
+            "group": "Games & Features",
+            "pages": [
+              "features/mini-games",
+              "features/bots",
+              "features/chat-irc-discord"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/server-properties",
+              "configuration/security",
+              "configuration/compiling"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer Guide",
+        "groups": [
+          {
+            "group": "Plugin Development",
+            "pages": [
+              "dev/plugin-overview",
+              "dev/creating-a-plugin",
+              "dev/creating-a-command"
+            ]
+          },
+          {
+            "group": "Events & API",
+            "pages": [
+              "dev/events",
+              "dev/player-api",
+              "dev/level-api"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "dev/configuration-api",
+              "dev/database-api"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Plugin system for extending server functionality with custom C# plugins",
+    "Extensible command framework for adding custom slash commands",
+    "Event system with priority-based handlers (PlayerChat, PlayerMove, PlayerConnect, etc.)",
+    "Rank-based permission system with fully configurable groups",
+    "World/level management with physics, zones, and access controls",
+    "Built-in mini-games: Zombie Survival, CTF, Lava Survival, TNT Wars, Countdown",
+    "Economy system with configurable shop items and currency",
+    "AI bots with programmable behavior instructions",
+    "Discord and IRC relay integration",
+    "BlockDB block change tracking and undo system",
+    "Map generation with multiple terrain styles and biomes",
+    "Overseer realms for per-player personal worlds",
+    "CPE (Classic Protocol Extension) support for enhanced client features",
+    "SQLite and MySQL database backends"
+  ],
+  "publicApiSurface": [
+    "Plugin (abstract class) — Load(), Unload(), Help(Player p)",
+    "Command / Command2 (abstract class) — Use(Player p, string message), Help(Player p)",
+    "IEvent<T>.Register(method, priority) / IEvent<T>.Unregister(method)",
+    "OnPlayerChatEvent, OnPlayerMoveEvent, OnPlayerCommandEvent, OnPlayerConnectEvent",
+    "OnLevelLoadedEvent, OnLevelUnloadEvent, OnLevelSaveEvent",
+    "OnServerShutdownEvent, OnModActionEvent",
+    "Player.Message(string), Player.SendBlockchange(...), Player.DefaultCmdData",
+    "Level.SetBlock(...), Level.GetBlock(...), Level.Config",
+    "Group.GroupList, Group.Find(LevelPermission)",
+    "Server.Config (ServerConfig properties)",
+    "IScripting.COMMANDS_DLL_DIR, IScripting.PLUGINS_DLL_DIR",
+    "Command.Register(Command), Command.Unregister(Command), Command.Find(string)",
+    "CommandPerms, CommandExtraPerms",
+    "Database.Execute(...), Database.ReadRows(...)"
+  ]
+}

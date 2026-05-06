@@ -1,81 +1,107 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
-icon: 'rocket'
+title: "Get started with MCGalaxy"
+description: "Learn how to download, install, and run your MCGalaxy ClassiCube server on Windows, macOS, or Linux, connect as a player, and grant yourself owner rank."
 ---
 
-## Get started in three steps
+MCGalaxy runs on Windows, macOS, and Linux. This guide walks you from a fresh download to a running server where you can connect and play. The whole process takes under five minutes.
 
-Get your documentation site running locally and make your first customization.
+## System requirements
 
-### Step 1: Set up your local environment
+<Tabs>
+  <Tab title="Windows">
+    Windows 8, 10, or 11 already include .NET Framework 4.0. No extra install needed.
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    For .NET 6/7/8 builds, install the [.NET runtime](https://dotnet.microsoft.com/download) for your target version.
+  </Tab>
+  <Tab title="macOS">
+    Install the [Mono framework](https://www.mono-project.com) to run the prebuilt release.
 
-### Step 2: Deploy your changes
+    Alternatively, install the .NET SDK to compile and run a .NET 6/7/8 build.
+  </Tab>
+  <Tab title="Linux">
+    Install Mono:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    # Ubuntu/Debian
+    sudo apt install mono-complete
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    # Or install the .NET runtime for .NET 6/7/8 builds
+    ```
+  </Tab>
+</Tabs>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+## Download
 
-### Step 3: Go live
+Download the latest MCGalaxy release from [classicube.net/mcg/download](https://www.classicube.net/mcg/download/). Extract the zip to a folder of your choice.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Start the server
+
+<Steps>
+  <Step title="Launch MCGalaxy">
+    <Tabs>
+      <Tab title="Windows (GUI)">
+        Double-click **MCGalaxy.exe** to open the graphical interface. The console log window appears and the server starts on port `25565`.
+      </Tab>
+      <Tab title="Windows (CLI)">
+        Run **MCGalaxyCLI.exe** from a Command Prompt for headless operation:
+
+        ```bash
+        MCGalaxyCLI.exe
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        Run via Mono:
+
+        ```bash
+        mono MCGalaxyCLI.exe
+        ```
+
+        Or use the included helper script:
+
+        ```bash
+        chmod +x mcf.sh
+        ./mcf.sh
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Connect to your server">
+    Open the ClassiCube client, click **Direct connect**, enter:
+
+    - **Username**: your ClassiCube account name
+    - **IP:Port**: `127.0.0.1:25565`
+    - **Mppass**: leave blank
+
+    Then click **Connect**.
+  </Step>
+  <Step title="Give yourself owner rank">
+    In the MCGalaxy console window (or the bottom input of the GUI), type:
+
+    ```
+    rank [yourusername] owner
+    ```
+
+    You now have full access to all commands.
+
+    <Warning>
+      Type the command directly in the server console — do NOT use `/rank` with the slash prefix in the console.
+    </Warning>
+  </Step>
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Let others join" icon="users" href="/joining-your-server">
+    Share your server with LAN players or open it to the internet.
+  </Card>
+  <Card title="Ranks & permissions" icon="shield" href="/administration/ranks-permissions">
+    Configure player ranks and command permissions.
+  </Card>
+  <Card title="Create worlds" icon="globe" href="/worlds/creating-levels">
+    Build and manage multiple levels on your server.
+  </Card>
+  <Card title="Add plugins" icon="puzzle-piece" href="/dev/plugin-overview">
+    Extend your server with custom C# plugins.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
